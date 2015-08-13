@@ -26,6 +26,52 @@
     <property name="title">
      <string/>
     </property>
+    <widget class="QPushButton" name="Brush">
+     <property name="geometry">
+      <rect>
+       <x>0</x>
+       <y>60</y>
+       <width>41</width>
+       <height>41</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string/>
+     </property>
+     <property name="icon">
+      <iconset>
+       <normaloff>../../paintbrush-152965_1280.png</normaloff>../../paintbrush-152965_1280.png</iconset>
+     </property>
+     <property name="iconSize">
+      <size>
+       <width>41</width>
+       <height>41</height>
+      </size>
+     </property>
+    </widget>
+    <widget class="QPushButton" name="Rectangle">
+     <property name="geometry">
+      <rect>
+       <x>0</x>
+       <y>180</y>
+       <width>41</width>
+       <height>41</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string/>
+     </property>
+     <property name="icon">
+      <iconset>
+       <normaloff>../../rectangle-34969_1280.png</normaloff>../../rectangle-34969_1280.png</iconset>
+     </property>
+     <property name="iconSize">
+      <size>
+       <width>41</width>
+       <height>41</height>
+      </size>
+     </property>
+    </widget>
    </widget>
    <widget class="QGroupBox" name="imageLoader">
     <property name="geometry">
@@ -103,22 +149,6 @@
     <hint type="destinationlabel">
      <x>353</x>
      <y>269</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>actionAbrir</sender>
-   <signal>activated()</signal>
-   <receiver>imageLoader</receiver>
-   <slot>setFocus()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>-1</x>
-     <y>-1</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>430</x>
-     <y>330</y>
     </hint>
    </hints>
   </connection>
