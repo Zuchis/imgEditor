@@ -40,7 +40,7 @@
      </property>
      <property name="icon">
       <iconset>
-       <normaloff>../../paintbrush-152965_1280.png</normaloff>../../paintbrush-152965_1280.png</iconset>
+       <normaloff>paintbrush.png</normaloff>paintbrush.png</iconset>
      </property>
      <property name="iconSize">
       <size>
@@ -63,7 +63,7 @@
      </property>
      <property name="icon">
       <iconset>
-       <normaloff>../../rectangle-34969_1280.png</normaloff>../../rectangle-34969_1280.png</iconset>
+       <normaloff>rectangle.png</normaloff>rectangle.png</iconset>
      </property>
      <property name="iconSize">
       <size>
