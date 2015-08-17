@@ -73,17 +73,14 @@
      </property>
     </widget>
    </widget>
-   <widget class="QGroupBox" name="imageLoader">
+   <widget class="QWidget" name="imageLoader" native="true">
     <property name="geometry">
      <rect>
       <x>50</x>
       <y>0</y>
-      <width>761</width>
-      <height>601</height>
+      <width>661</width>
+      <height>521</height>
      </rect>
-    </property>
-    <property name="title">
-     <string/>
     </property>
    </widget>
   </widget>
