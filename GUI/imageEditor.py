@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'imageEditor.ui'
 #
-# Created: Sun Aug 16 17:11:24 2015
+# Created: Mon Aug 17 19:51:22 2015
 #      by: PyQt4 UI code generator 4.10.4
 #
 # WARNING! All changes made in this file will be lost!
@@ -49,9 +49,8 @@ class Ui_MainWindow(object):
         self.Rectangle.setIcon(icon1)
         self.Rectangle.setIconSize(QtCore.QSize(41, 41))
         self.Rectangle.setObjectName(_fromUtf8("Rectangle"))
-        self.imageLoader = QtGui.QGroupBox(self.centralwidget)
-        self.imageLoader.setGeometry(QtCore.QRect(50, 0, 761, 601))
-        self.imageLoader.setTitle(_fromUtf8(""))
+        self.imageLoader = QtGui.QWidget(self.centralwidget)
+        self.imageLoader.setGeometry(QtCore.QRect(50, 0, 661, 521))
         self.imageLoader.setObjectName(_fromUtf8("imageLoader"))
         MainWindow.setCentralWidget(self.centralwidget)
         self.menubar = QtGui.QMenuBar(MainWindow)
