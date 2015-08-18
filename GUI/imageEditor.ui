@@ -6,22 +6,34 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>707</width>
-    <height>539</height>
+    <width>1000</width>
+    <height>1000</height>
    </rect>
   </property>
   <property name="windowTitle">
    <string>MainWindow</string>
   </property>
   <widget class="QWidget" name="centralwidget">
+   <property name="maximumSize">
+    <size>
+     <width>1000</width>
+     <height>1000</height>
+    </size>
+   </property>
    <widget class="QGroupBox" name="toolBar">
     <property name="geometry">
      <rect>
       <x>0</x>
       <y>0</y>
-      <width>51</width>
-      <height>581</height>
+      <width>50</width>
+      <height>1000</height>
      </rect>
+    </property>
+    <property name="maximumSize">
+     <size>
+      <width>50</width>
+      <height>1000</height>
+     </size>
     </property>
     <property name="title">
      <string/>
@@ -78,9 +90,15 @@
      <rect>
       <x>50</x>
       <y>0</y>
-      <width>661</width>
-      <height>521</height>
+      <width>950</width>
+      <height>1000</height>
      </rect>
+    </property>
+    <property name="maximumSize">
+     <size>
+      <width>950</width>
+      <height>1000</height>
+     </size>
     </property>
    </widget>
   </widget>
@@ -89,7 +107,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>707</width>
+     <width>1000</width>
      <height>25</height>
     </rect>
    </property>

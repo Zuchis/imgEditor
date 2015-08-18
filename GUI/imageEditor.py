@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'imageEditor.ui'
 #
-# Created: Mon Aug 17 19:51:22 2015
+# Created: Tue Aug 18 16:01:43 2015
 #      by: PyQt4 UI code generator 4.10.4
 #
 # WARNING! All changes made in this file will be lost!
@@ -26,11 +26,13 @@ except AttributeError:
 class Ui_MainWindow(object):
     def setupUi(self, MainWindow):
         MainWindow.setObjectName(_fromUtf8("MainWindow"))
-        MainWindow.resize(707, 539)
+        MainWindow.resize(1000, 1000)
         self.centralwidget = QtGui.QWidget(MainWindow)
+        self.centralwidget.setMaximumSize(QtCore.QSize(1000, 1000))
         self.centralwidget.setObjectName(_fromUtf8("centralwidget"))
         self.toolBar = QtGui.QGroupBox(self.centralwidget)
-        self.toolBar.setGeometry(QtCore.QRect(0, 0, 51, 581))
+        self.toolBar.setGeometry(QtCore.QRect(0, 0, 50, 1000))
+        self.toolBar.setMaximumSize(QtCore.QSize(50, 1000))
         self.toolBar.setTitle(_fromUtf8(""))
         self.toolBar.setObjectName(_fromUtf8("toolBar"))
         self.Brush = QtGui.QPushButton(self.toolBar)
@@ -50,11 +52,12 @@ class Ui_MainWindow(object):
         self.Rectangle.setIconSize(QtCore.QSize(41, 41))
         self.Rectangle.setObjectName(_fromUtf8("Rectangle"))
         self.imageLoader = QtGui.QWidget(self.centralwidget)
-        self.imageLoader.setGeometry(QtCore.QRect(50, 0, 661, 521))
+        self.imageLoader.setGeometry(QtCore.QRect(50, 0, 950, 1000))
+        self.imageLoader.setMaximumSize(QtCore.QSize(950, 1000))
         self.imageLoader.setObjectName(_fromUtf8("imageLoader"))
         MainWindow.setCentralWidget(self.centralwidget)
         self.menubar = QtGui.QMenuBar(MainWindow)
-        self.menubar.setGeometry(QtCore.QRect(0, 0, 707, 25))
+        self.menubar.setGeometry(QtCore.QRect(0, 0, 1000, 25))
         self.menubar.setObjectName(_fromUtf8("menubar"))
         self.menuArquivo = QtGui.QMenu(self.menubar)
         self.menuArquivo.setObjectName(_fromUtf8("menuArquivo"))
