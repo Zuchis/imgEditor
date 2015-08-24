@@ -14,13 +14,20 @@ class gui(QtGui.QMainWindow, Ui_MainWindow,QtGui.QDialog):
     def openFile(self):
         fileName = QtGui.QFileDialog.getOpenFileName(self, "Abrir Imagem")
         if fileName:
-            point = QtCore.QPoint(0,0)            
-            size = QtCore.QSize(self.image.width(), self.image.height())
             self.image.load(fileName)
-            painter = QtGui.QPainter(self.image)
             print (self.image.width(), self.image.height())
-            #painter.drawImage(point,self.image)
-            pixmap = QtGui.QPixmap(fileName)
-            self.lbl.setPixmap(pixmap)
-            self.hbox.addWidget(self.lbl)
-            self.imageLoader.setLayout(self.hbox)
+            self.imageLoader.update()
+            #pixmap = QtGui.QPixmap(fileName)
+            #self.lbl.setPixmap(pixmap)
+            #self.hbox.addWidget(self.lbl)
+            #self.imageLoader.setLayout(self.hbox)
+
+    def paintEvent(self, event):
+        qp = QtGui.QPainter()
+        qp.begin(self)
+        self.loadTheImage(qp)
+        qp.end()
+
+    def loadTheImage(self,qp):
+        qp.drawImage(0,0,self.image)
+        
