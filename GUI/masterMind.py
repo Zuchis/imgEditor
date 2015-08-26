@@ -10,11 +10,16 @@ class imageProcesser(QtGui.QWidget):
         self.setGeometry(50,0,950,1000)
         self.modified = False
         self.scribbling = False
-        self.myPenWidth = 5
+        self.myPenWidth = 1 
         self.myPenColor = QtCore.Qt.red
         self.image = QtGui.QImage()
         self.lastPoint = QtCore.QPoint()
+        self.recp1 = QtCore.QPoint(0,0)
+        self.recp2 = QtCore.QPoint(0,0)
+        self.pointZero = QtCore.QPoint(0,0)
         self.brushToggle = False
+        self.recToggle = False
+        self.canDrawRec = True
 
     def openImage(self, fileName):
         loadedImage = QtGui.QImage()
@@ -24,14 +29,14 @@ class imageProcesser(QtGui.QWidget):
         #newSize = loadedImage.size().expandedTo(self.size())
         #self.resizeImage(loadedImage, newSize)
         self.image = loadedImage
+        print(self.image.width(),self.image.height())
         self.modified = False
         self.update()
         return True
 
     def saveImage(self,fileName,fileFormat):
         visibleImage = self.image
-        self.resizeImage(visibleImage, self.size())
-
+        #self.resizeImage(visibleImage, self.size())
         if visibleImage.save(fileName,fileFormat):
             self.modified = False
             return True
@@ -41,13 +46,24 @@ class imageProcesser(QtGui.QWidget):
     def clearImage(self):
         self.image.fill(QtGui.qRgb(255, 255, 255))
         self.modified = True
+        self.canDrawRec = True
         self.update()
 
     def mousePressEvent(self, event):
-        if event.button() == QtCore.Qt.LeftButton:
-            self.lastPoint = event.pos()
-            self.scribbling = True
-
+        if self.brushToggle == True:
+            if event.button() == QtCore.Qt.LeftButton:
+                self.lastPoint = event.pos()
+                self.scribbling = True
+        elif self.recToggle == True:
+            if event.button() == QtCore.Qt.LeftButton:
+                if self.recp1 == self.pointZero:
+                   self.recp1 = event.pos() 
+                   #print (self.recp1)
+                elif self.recp2 == self.pointZero:
+                   self.recp2 = event.pos() 
+                   #print (self.recp2)
+                   self.drawRec()
+                
     def mouseMoveEvent(self, event):
         if (event.buttons() & QtCore.Qt.LeftButton) and self.scribbling:
             self.drawLineTo(event.pos())
@@ -87,15 +103,19 @@ class imageProcesser(QtGui.QWidget):
             self.lastPoint = QtCore.QPoint(endPoint)
             #print
 
-    #def resizeImage(self, image, newSize):
-        #if image.size() == newSize:
-            #return
-
-        #newImage = QtGui.QImage(newSize, QtGui.QImage.Format_RGB32)
-        #newImage.fill(QtGui.qRgb(255, 255, 255))
-        #painter = QtGui.QPainter(newImage)
-        #painter.drawImage(QtCore.QPoint(0, 0), image)
-        #self.image = newImage
+    def drawRec(self):
+        if self.recToggle == True and self.canDrawRec == True:
+            x = self.recp1.x()
+            y = self.recp1.y()
+            w = self.recp2.x() - self.recp1.x()
+            h = self.recp2.y() - self.recp1.y()
+            painter = QtGui.QPainter(self.image)
+            painter.setPen(QtGui.QPen(self.myPenColor, self.myPenWidth,
+                    QtCore.Qt.SolidLine, QtCore.Qt.RoundCap, QtCore.Qt.RoundJoin))
+            painter.drawRect(x,y,w,h)
+            self.modified = True
+            self.canDrawRec = False
+            self.update()
 
     def isModified(self):
         return self.modified
@@ -109,8 +129,16 @@ class imageProcesser(QtGui.QWidget):
     def toggleBrush(self):
         if self.brushToggle == False:
             self.brushToggle = True
+            self.recToggle = False
         else:
             self.brushToggle = False
+
+    def toggleRec(self):
+        if self.recToggle == False:
+            self.recToggle = True
+            self.brushToggle = False
+        else:
+            self.recToggle = False
                      
 class gui(QtGui.QMainWindow, Ui_MainWindow,QtGui.QDialog):
     def __init__(self, parent=None):
@@ -119,19 +147,19 @@ class gui(QtGui.QMainWindow, Ui_MainWindow,QtGui.QDialog):
         QtCore.QObject.connect(self.actionAbrir, QtCore.SIGNAL(("activated()")), self.openFile)
         self.scribbler = imageProcesser(self.centralwidget)
         QtCore.QObject.connect(self.actionDeletar, QtCore.SIGNAL(("activated()")), self.scribbler.clearImage)
+        QtCore.QObject.connect(self.actionSalvar, QtCore.SIGNAL(("activated()")), self.save)
         self.Brush.clicked.connect(self.scribbler.toggleBrush)
+        self.Rectangle.clicked.connect(self.scribbler.toggleRec)
         #self.setCentralWidget(self.scribbler)
 
     def openFile(self):
         fileName = QtGui.QFileDialog.getOpenFileName(self, "Abrir Imagem")
         if fileName:
             self.scribbler.openImage(fileName)
-            #pixmap = QtGui.QPixmap(fileName)
-            #self.lbl.setPixmap(pixmap)
-            #self.hbox.addWidget(self.lbl)
-            #self.imageLoader.setLayout(self.hbox)
+            self.scribbler.setGeometry(50,0,self.scribbler.image.width(),self.scribbler.image.height())
 
     def save(self):
-        action = self.sender()
-        fileFormat = action.data()
-        self.saveFile(fileFormat)
+        fileName = QtGui.QFileDialog.getSaveFileName(self, "Salvar Imagem","/home/untitled.jpg",("Images (*.png *.jpg)"))
+        self.scribbler.image.save(fileName)
+        #fileFormat = action.data()
+        #self.saveFile(fileFormat)
