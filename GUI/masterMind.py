@@ -7,20 +7,22 @@ class imageProcesser(QtGui.QWidget):
         super(imageProcesser, self).__init__(parent)
 
         self.setAttribute(QtCore.Qt.WA_StaticContents)
+        self.setGeometry(50,0,950,1000)
         self.modified = False
         self.scribbling = False
         self.myPenWidth = 5
         self.myPenColor = QtCore.Qt.red
         self.image = QtGui.QImage()
         self.lastPoint = QtCore.QPoint()
+        self.brushToggle = False
 
     def openImage(self, fileName):
         loadedImage = QtGui.QImage()
         if not loadedImage.load(fileName):
             return False
 
-        newSize = loadedImage.size().expandedTo(self.size())
-        self.resizeImage(loadedImage, newSize)
+        #newSize = loadedImage.size().expandedTo(self.size())
+        #self.resizeImage(loadedImage, newSize)
         self.image = loadedImage
         self.modified = False
         self.update()
@@ -60,35 +62,40 @@ class imageProcesser(QtGui.QWidget):
         painter.drawImage(event.rect(), self.image)
 
 
-    def resizeEvent(self, event):
-        if self.width() > self.image.width() or self.height() > self.image.height():
-            newWidth = max(self.width() + 128, self.image.width())
-            newHeight = max(self.height() + 128, self.image.height())
-            self.resizeImage(self.image, QtCore.QSize(newWidth, newHeight))
-            self.update()
+    #def resizeEvent(self, event):
+        #if self.width() > self.image.width() or self.height() > self.image.height():
+            #newWidth = max(self.width() + 128, self.image.width())
+            #newHeight = max(self.height() + 128, self.image.height())
+            #self.resizeImage(self.image, QtCore.QSize(newWidth, newHeight))
+            #self.update()
 
-        super(imageProcesser, self).resizeEvent(event)
+        #self.resizeImage(self.image, event.size())
+        #super(imageProcesser, self).resizeEvent(event)
 
     def drawLineTo(self, endPoint):
-        painter = QtGui.QPainter(self.image)
-        painter.setPen(QtGui.QPen(self.myPenColor, self.myPenWidth,
-                QtCore.Qt.SolidLine, QtCore.Qt.RoundCap, QtCore.Qt.RoundJoin))
-        painter.drawLine(self.lastPoint, endPoint)
-        self.modified = True
+        if self.brushToggle == True:
+            painter = QtGui.QPainter(self.image)
+            painter.setPen(QtGui.QPen(self.myPenColor, self.myPenWidth,
+                    QtCore.Qt.SolidLine, QtCore.Qt.RoundCap, QtCore.Qt.RoundJoin))
+            painter.drawLine(self.lastPoint, endPoint)
+            self.modified = True
+            #rad = self.myPenWidth / 2 + 2
+            #self.update(QtCore.QRect(self.lastPoint, endPoint).normalized().adjusted(-rad, -rad, +rad, +rad))
+            self.update()
+            #print(self.image.width(),self.image.height())
+            #print(self.lastPoint)
+            self.lastPoint = QtCore.QPoint(endPoint)
+            #print
 
-        rad = self.myPenWidth / 2 + 2
-        self.update(QtCore.QRect(self.lastPoint, endPoint).normalized().adjusted(-rad, -rad, +rad, +rad))
-        self.lastPoint = QtCore.QPoint(endPoint)
+    #def resizeImage(self, image, newSize):
+        #if image.size() == newSize:
+            #return
 
-    def resizeImage(self, image, newSize):
-        if image.size() == newSize:
-            return
-
-        newImage = QtGui.QImage(newSize, QtGui.QImage.Format_RGB32)
-        newImage.fill(QtGui.qRgb(255, 255, 255))
-        painter = QtGui.QPainter(newImage)
-        painter.drawImage(QtCore.QPoint(0, 0), image)
-        self.image = newImage
+        #newImage = QtGui.QImage(newSize, QtGui.QImage.Format_RGB32)
+        #newImage.fill(QtGui.qRgb(255, 255, 255))
+        #painter = QtGui.QPainter(newImage)
+        #painter.drawImage(QtCore.QPoint(0, 0), image)
+        #self.image = newImage
 
     def isModified(self):
         return self.modified
@@ -98,15 +105,22 @@ class imageProcesser(QtGui.QWidget):
 
     def penWidth(self):
         return self.myPenWidth
-                     
 
+    def toggleBrush(self):
+        if self.brushToggle == False:
+            self.brushToggle = True
+        else:
+            self.brushToggle = False
+                     
 class gui(QtGui.QMainWindow, Ui_MainWindow,QtGui.QDialog):
     def __init__(self, parent=None):
         QtGui.QMainWindow.__init__(self)
         self.setupUi(self)
         QtCore.QObject.connect(self.actionAbrir, QtCore.SIGNAL(("activated()")), self.openFile)
-        self.scribbler = imageProcesser()
-        self.setCentralWidget(self.scribbler)
+        self.scribbler = imageProcesser(self.centralwidget)
+        QtCore.QObject.connect(self.actionDeletar, QtCore.SIGNAL(("activated()")), self.scribbler.clearImage)
+        self.Brush.clicked.connect(self.scribbler.toggleBrush)
+        #self.setCentralWidget(self.scribbler)
 
     def openFile(self):
         fileName = QtGui.QFileDialog.getOpenFileName(self, "Abrir Imagem")
