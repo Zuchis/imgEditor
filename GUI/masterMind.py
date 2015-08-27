@@ -14,9 +14,9 @@ class imageProcesser(QtGui.QWidget):
         self.myPenColor = QtCore.Qt.red
         self.image = QtGui.QImage()
         self.lastPoint = QtCore.QPoint()
-        self.recp1 = QtCore.QPoint(0,0)
-        self.recp2 = QtCore.QPoint(0,0)
-        self.pointZero = QtCore.QPoint(0,0)
+        self.recp1 = QtCore.QPoint(-1,-1)
+        self.recp2 = QtCore.QPoint(-1,-1)
+        self.pointNull = QtCore.QPoint(-1,-1)
         self.brushToggle = False
         self.recToggle = False
         self.canDrawRec = True
@@ -47,6 +47,8 @@ class imageProcesser(QtGui.QWidget):
         self.image.fill(QtGui.qRgb(255, 255, 255))
         self.modified = True
         self.canDrawRec = True
+        self.recp1 = self.pointNull
+        self.recp2 = self.pointNull
         self.update()
 
     def mousePressEvent(self, event):
@@ -56,10 +58,10 @@ class imageProcesser(QtGui.QWidget):
                 self.scribbling = True
         elif self.recToggle == True:
             if event.button() == QtCore.Qt.LeftButton:
-                if self.recp1 == self.pointZero:
+                if self.recp1 == self.pointNull:
                    self.recp1 = event.pos() 
                    #print (self.recp1)
-                elif self.recp2 == self.pointZero:
+                elif self.recp2 == self.pointNull:
                    self.recp2 = event.pos() 
                    #print (self.recp2)
                    self.drawRec()
@@ -150,6 +152,7 @@ class gui(QtGui.QMainWindow, Ui_MainWindow,QtGui.QDialog):
         QtCore.QObject.connect(self.actionSalvar, QtCore.SIGNAL(("activated()")), self.save)
         self.Brush.clicked.connect(self.scribbler.toggleBrush)
         self.Rectangle.clicked.connect(self.scribbler.toggleRec)
+        self.f = None
         #self.setCentralWidget(self.scribbler)
 
     def openFile(self):
@@ -161,5 +164,19 @@ class gui(QtGui.QMainWindow, Ui_MainWindow,QtGui.QDialog):
     def save(self):
         fileName = QtGui.QFileDialog.getSaveFileName(self, "Salvar Imagem","/home/untitled.jpg",("Images (*.png *.jpg)"))
         self.scribbler.image.save(fileName)
+        self.outputManipulation(fileName)
         #fileFormat = action.data()
         #self.saveFile(fileFormat)
+    
+    def outputManipulation(self,fileName):
+        splits = fileName.split('/')
+        output = '/'.join(splits[:-1])
+        output = output + '/output.txt'
+        self.f = open(output,"w")
+        x1 = self.scribbler.recp1.x()
+        y1 = self.scribbler.recp1.y()
+        x2 = self.scribbler.recp2.x()
+        y2 = self.scribbler.recp2.y()
+        self.f.write(fileName + '\n')
+        self.f.write(str(self.scribbler.image.width()) + ' ' +  str(self.scribbler.image.height()) + '\n')
+        self.f.write('(' + str(x1) +','+str(y1) + ')' + '  ' + '(' + str(x2) +','+str(y2) + ')' + '\n')
