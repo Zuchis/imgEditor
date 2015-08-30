@@ -12,6 +12,7 @@ class imageProcesser(QtGui.QWidget):
         self.scribbling = False
         self.myPenWidth = 1 
         self.myPenColor = QtCore.Qt.red
+        print (QtCore.Qt.red)
         self.image = QtGui.QImage()
         self.lastPoint = QtCore.QPoint()
         self.recp1 = QtCore.QPoint(-1,-1)
