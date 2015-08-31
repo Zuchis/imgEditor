@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'imageEditor.ui'
 #
-# Created: Tue Aug 25 14:56:17 2015
+# Created: Mon Aug 31 18:06:43 2015
 #      by: PyQt4 UI code generator 4.10.4
 #
 # WARNING! All changes made in this file will be lost!
@@ -51,6 +51,14 @@ class Ui_MainWindow(object):
         self.Rectangle.setIcon(icon1)
         self.Rectangle.setIconSize(QtCore.QSize(41, 41))
         self.Rectangle.setObjectName(_fromUtf8("Rectangle"))
+        self.BlackRec = QtGui.QPushButton(self.toolBar)
+        self.BlackRec.setGeometry(QtCore.QRect(0, 290, 41, 31))
+        self.BlackRec.setText(_fromUtf8(""))
+        icon2 = QtGui.QIcon()
+        icon2.addPixmap(QtGui.QPixmap(_fromUtf8("blackRec.jpg")), QtGui.QIcon.Normal, QtGui.QIcon.Off)
+        self.BlackRec.setIcon(icon2)
+        self.BlackRec.setIconSize(QtCore.QSize(41, 41))
+        self.BlackRec.setObjectName(_fromUtf8("BlackRec"))
         MainWindow.setCentralWidget(self.centralwidget)
         self.menubar = QtGui.QMenuBar(MainWindow)
         self.menubar.setGeometry(QtCore.QRect(0, 0, 1000, 25))
@@ -68,7 +76,10 @@ class Ui_MainWindow(object):
         self.actionDeletar.setObjectName(_fromUtf8("actionDeletar"))
         self.actionSair = QtGui.QAction(MainWindow)
         self.actionSair.setObjectName(_fromUtf8("actionSair"))
+        self.actionFinalizar_Demarca_o = QtGui.QAction(MainWindow)
+        self.actionFinalizar_Demarca_o.setObjectName(_fromUtf8("actionFinalizar_Demarca_o"))
         self.menuArquivo.addAction(self.actionAbrir)
+        self.menuArquivo.addAction(self.actionFinalizar_Demarca_o)
         self.menuArquivo.addAction(self.actionSalvar)
         self.menuArquivo.addAction(self.actionDeletar)
         self.menuArquivo.addAction(self.actionSair)
@@ -87,4 +98,5 @@ class Ui_MainWindow(object):
         self.actionSalvar.setText(_translate("MainWindow", "Salvar...", None))
         self.actionDeletar.setText(_translate("MainWindow", "Deletar", None))
         self.actionSair.setText(_translate("MainWindow", "Sair", None))
+        self.actionFinalizar_Demarca_o.setText(_translate("MainWindow", "Finalizar Demarcação", None))
 

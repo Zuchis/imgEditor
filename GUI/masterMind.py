@@ -1,6 +1,10 @@
 import sys
 from PyQt4 import *
 from imageEditor import *
+from PIL import Image
+
+# TODO
+# Adicionar dialogos para modificação de arquivos, avisar que a imagem não foi binarizada
 
 class imageProcesser(QtGui.QWidget):
     def __init__(self, parent=None):
@@ -14,6 +18,7 @@ class imageProcesser(QtGui.QWidget):
         self.myPenColor = QtCore.Qt.red
         print (QtCore.Qt.red)
         self.image = QtGui.QImage()
+        self.binImage = QtGui.QImage()
         self.lastPoint = QtCore.QPoint()
         self.recp1 = QtCore.QPoint(-1,-1)
         self.recp2 = QtCore.QPoint(-1,-1)
@@ -21,6 +26,8 @@ class imageProcesser(QtGui.QWidget):
         self.brushToggle = False
         self.recToggle = False
         self.canDrawRec = True
+        self.canSave = False
+        self.fileName_ = None
 
     def openImage(self, fileName):
         loadedImage = QtGui.QImage()
@@ -30,6 +37,7 @@ class imageProcesser(QtGui.QWidget):
         #newSize = loadedImage.size().expandedTo(self.size())
         #self.resizeImage(loadedImage, newSize)
         self.image = loadedImage
+        self.fileName_ = fileName
         print(self.image.width(),self.image.height())
         self.modified = False
         self.update()
@@ -120,6 +128,29 @@ class imageProcesser(QtGui.QWidget):
             self.canDrawRec = False
             self.update()
 
+    def binarize(fileName):
+        fileNameSave = QtGui.QFileDialog.getSaveFileName(self, "Salvar Imagem","/home/untitled.jpg",("Images (*.png *.jpg)"))
+        self.scribbler.image.save(fileNameSave)
+        self.canSave = True
+        img = Image.open(fileName)
+        #out = Image.new(img.mode,(297,318))
+        T = 100
+        offset = 0
+        xOrigin = self.recp1.x()
+        xDestin = self.recp2.x()
+        yOrigin = self.recp1.y()
+        yDestin = self.recp2.y()
+        for i in range (xOrigin+offset,xDestin+offset):
+            for j in range (yOrigin+offset,yDestin+offset):
+                r,g,b = img.getpixel((i,j))
+                if r > 200:
+                    #print (r,g,b)
+                    #print (i,j)
+                    img.putpixel((i,j), (255,255,255))
+                else:
+                    img.putpixel((i,j), (0,0,0))
+        self.update()
+
     def isModified(self):
         return self.modified
 
@@ -128,6 +159,10 @@ class imageProcesser(QtGui.QWidget):
 
     def penWidth(self):
         return self.myPenWidth
+
+    def changeBlack(self):
+        self.myPenColor = QtCore.Qt.black
+        self.myPenWidth = 3
 
     def toggleBrush(self):
         if self.brushToggle == False:
@@ -151,8 +186,10 @@ class gui(QtGui.QMainWindow, Ui_MainWindow,QtGui.QDialog):
         self.scribbler = imageProcesser(self.centralwidget)
         QtCore.QObject.connect(self.actionDeletar, QtCore.SIGNAL(("activated()")), self.scribbler.clearImage)
         QtCore.QObject.connect(self.actionSalvar, QtCore.SIGNAL(("activated()")), self.save)
+        QtCore.QObject.connect(self.actionFinalizar_Demarca_o, QtCore.SIGNAL(("activated()")), self.scribbler.binarize(self.scribbler.fileName_))
         self.Brush.clicked.connect(self.scribbler.toggleBrush)
         self.Rectangle.clicked.connect(self.scribbler.toggleRec)
+        self.BlackRec.clicked.connect(self.scribbler.changeBlack)
         self.f = None
         #self.setCentralWidget(self.scribbler)
 
@@ -162,12 +199,9 @@ class gui(QtGui.QMainWindow, Ui_MainWindow,QtGui.QDialog):
             self.scribbler.openImage(fileName)
             self.scribbler.setGeometry(50,0,self.scribbler.image.width(),self.scribbler.image.height())
 
-    def save(self):
-        fileName = QtGui.QFileDialog.getSaveFileName(self, "Salvar Imagem","/home/untitled.jpg",("Images (*.png *.jpg)"))
-        self.scribbler.image.save(fileName)
-        self.outputManipulation(fileName)
-        #fileFormat = action.data()
-        #self.saveFile(fileFormat)
+    def save(self,fileName):
+        if self.canSave == True:
+            self.outputManipulation(fileName)
     
     def outputManipulation(self,fileName):
         splits = fileName.split('/')
@@ -181,3 +215,12 @@ class gui(QtGui.QMainWindow, Ui_MainWindow,QtGui.QDialog):
         self.f.write(fileName + '\n')
         self.f.write(str(self.scribbler.image.width()) + ' ' +  str(self.scribbler.image.height()) + '\n')
         self.f.write('(' + str(x1) +','+str(y1) + ')' + '  ' + '(' + str(x2) +','+str(y2) + ')' + '\n')
+        for i in range (x1,x2):
+            for j in range (y1,y2):
+                c = self.scribbler.image.pixel(i,j)
+                r,g,b,a = QColor(c).getRgb()
+                if (r,g,b) == (255,255,255):
+                    self.f.write('1')
+                else:
+                    self.f.write('0')
+            self.f.write('\n')

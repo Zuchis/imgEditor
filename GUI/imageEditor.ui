@@ -84,6 +84,29 @@
       </size>
      </property>
     </widget>
+    <widget class="QPushButton" name="BlackRec">
+     <property name="geometry">
+      <rect>
+       <x>0</x>
+       <y>290</y>
+       <width>41</width>
+       <height>31</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string/>
+     </property>
+     <property name="icon">
+      <iconset>
+       <normaloff>blackRec.jpg</normaloff>blackRec.jpg</iconset>
+     </property>
+     <property name="iconSize">
+      <size>
+       <width>41</width>
+       <height>41</height>
+      </size>
+     </property>
+    </widget>
    </widget>
   </widget>
   <widget class="QMenuBar" name="menubar">
@@ -100,6 +123,7 @@
      <string>Arquivo</string>
     </property>
     <addaction name="actionAbrir"/>
+    <addaction name="actionFinalizar_Demarca_o"/>
     <addaction name="actionSalvar"/>
     <addaction name="actionDeletar"/>
     <addaction name="actionSair"/>
@@ -130,6 +154,11 @@
   <action name="actionSair">
    <property name="text">
     <string>Sair</string>
+   </property>
+  </action>
+  <action name="actionFinalizar_Demarca_o">
+   <property name="text">
+    <string>Finalizar Demarcação</string>
    </property>
   </action>
  </widget>
