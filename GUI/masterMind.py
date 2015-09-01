@@ -129,27 +129,34 @@ class imageProcesser(QtGui.QWidget):
             self.update()
 
     def binarize(self):
-        fileNameSave = QtGui.QFileDialog.getSaveFileName(self, "Salvar Imagem","/home/untitled.jpg",("Images (*.png *.jpg)"))
+        fileNameSave = QtGui.QFileDialog.getSaveFileName(self, "Salvar Imagem","/home/untitled.png",("Images (*.png)"))
         self.image.save(fileNameSave)
+        self.fileName_ = fileNameSave
         self.canSave = True
-        img = Image.open(self.fileName_)
-        #out = Image.new(img.mode,(297,318))
-        T = 100
+        img = Image.open(fileNameSave)
+        (w,h) = img.size
         offset = 0
         xOrigin = self.recp1.x()
         xDestin = self.recp2.x()
         yOrigin = self.recp1.y()
         yDestin = self.recp2.y()
+        xRange = range(xOrigin,xDestin)
+        yRange = range(yOrigin,yDestin)
+        for i in range (0,w):
+            for j in range (0,h):
+                if (i <= xOrigin or i>= xDestin) and (j <= yOrigin or j >= yDestin):
+                    img.putpixel((i,j),(0,0,0))
+
         for i in range (xOrigin+offset,xDestin+offset):
             for j in range (yOrigin+offset,yDestin+offset):
-                r,g,b = img.getpixel((i,j))
+                r,g,b = img.getpixel((i,j)) 
                 if r > 200:
-                    #print (r,g,b)
-                    #print (i,j)
-                    img.putpixel((i,j), (255,255,255))
+                    img.putpixel((i,j),(255,255,255))
                 else:
-                    img.putpixel((i,j), (0,0,0))
-        self.image.load(self.fileName_)
+                    img.putpixel((i,j),(0,0,0))
+
+        img.save('temp.png','PNG')
+        self.image.load('temp.png')
         self.update()
 
     def isModified(self):
@@ -200,12 +207,12 @@ class gui(QtGui.QMainWindow, Ui_MainWindow,QtGui.QDialog):
             self.scribbler.openImage(fileName)
             self.scribbler.setGeometry(50,0,self.scribbler.image.width(),self.scribbler.image.height())
 
-    def save(self,fileName):
-        if self.canSave == True:
-            self.outputManipulation(fileName)
+    def save(self):
+        if self.scribbler.canSave == True:
+            self.outputManipulation()
 
-    def outputManipulation(self,fileName):
-        splits = fileName.split('/')
+    def outputManipulation(self):
+        splits = self.scribbler.fileName_.split('/')
         output = '/'.join(splits[:-1])
         output = output + '/output.txt'
         self.f = open(output,"w")
@@ -213,13 +220,14 @@ class gui(QtGui.QMainWindow, Ui_MainWindow,QtGui.QDialog):
         y1 = self.scribbler.recp1.y()
         x2 = self.scribbler.recp2.x()
         y2 = self.scribbler.recp2.y()
-        self.f.write(fileName + '\n')
+        self.f.write(self.scribbler.fileName_ + '\n')
         self.f.write(str(self.scribbler.image.width()) + ' ' +  str(self.scribbler.image.height()) + '\n')
         self.f.write('(' + str(x1) +','+str(y1) + ')' + '  ' + '(' + str(x2) +','+str(y2) + ')' + '\n')
-        for i in range (x1,x2):
-            for j in range (y1,y2):
-                c = self.scribbler.image.pixel(i,j)
-                r,g,b,a = QColor(c).getRgb()
+        self.scribbler.image.save('temp.png')
+        img = Image.open('temp.png')
+        for j in range (y1,y2):
+            for i in range (x1,x2):
+                r,g,b = img.getpixel((i,j))
                 if (r,g,b) == (255,255,255):
                     self.f.write('1')
                 else:
