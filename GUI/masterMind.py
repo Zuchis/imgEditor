@@ -14,7 +14,7 @@ class imageProcesser(QtGui.QWidget):
         self.setGeometry(50,0,950,1000)
         self.modified = False
         self.scribbling = False
-        self.myPenWidth = 1 
+        self.myPenWidth = 1
         self.myPenColor = QtCore.Qt.red
         print (QtCore.Qt.red)
         self.image = QtGui.QImage()
@@ -68,13 +68,13 @@ class imageProcesser(QtGui.QWidget):
         elif self.recToggle == True:
             if event.button() == QtCore.Qt.LeftButton:
                 if self.recp1 == self.pointNull:
-                   self.recp1 = event.pos() 
+                   self.recp1 = event.pos()
                    #print (self.recp1)
                 elif self.recp2 == self.pointNull:
-                   self.recp2 = event.pos() 
+                   self.recp2 = event.pos()
                    #print (self.recp2)
                    self.drawRec()
-                
+
     def mouseMoveEvent(self, event):
         if (event.buttons() & QtCore.Qt.LeftButton) and self.scribbling:
             self.drawLineTo(event.pos())
@@ -128,11 +128,11 @@ class imageProcesser(QtGui.QWidget):
             self.canDrawRec = False
             self.update()
 
-    def binarize(fileName):
+    def binarize(self):
         fileNameSave = QtGui.QFileDialog.getSaveFileName(self, "Salvar Imagem","/home/untitled.jpg",("Images (*.png *.jpg)"))
-        self.scribbler.image.save(fileNameSave)
+        self.image.save(fileNameSave)
         self.canSave = True
-        img = Image.open(fileName)
+        img = Image.open(self.fileName_)
         #out = Image.new(img.mode,(297,318))
         T = 100
         offset = 0
@@ -149,6 +149,7 @@ class imageProcesser(QtGui.QWidget):
                     img.putpixel((i,j), (255,255,255))
                 else:
                     img.putpixel((i,j), (0,0,0))
+        self.image.load(self.fileName_)
         self.update()
 
     def isModified(self):
@@ -177,7 +178,7 @@ class imageProcesser(QtGui.QWidget):
             self.brushToggle = False
         else:
             self.recToggle = False
-                     
+
 class gui(QtGui.QMainWindow, Ui_MainWindow,QtGui.QDialog):
     def __init__(self, parent=None):
         QtGui.QMainWindow.__init__(self)
@@ -186,7 +187,7 @@ class gui(QtGui.QMainWindow, Ui_MainWindow,QtGui.QDialog):
         self.scribbler = imageProcesser(self.centralwidget)
         QtCore.QObject.connect(self.actionDeletar, QtCore.SIGNAL(("activated()")), self.scribbler.clearImage)
         QtCore.QObject.connect(self.actionSalvar, QtCore.SIGNAL(("activated()")), self.save)
-        QtCore.QObject.connect(self.actionFinalizar_Demarca_o, QtCore.SIGNAL(("activated()")), self.scribbler.binarize(self.scribbler.fileName_))
+        QtCore.QObject.connect(self.actionFinalizar_Demarca_o, QtCore.SIGNAL(("activated()")), self.scribbler.binarize)
         self.Brush.clicked.connect(self.scribbler.toggleBrush)
         self.Rectangle.clicked.connect(self.scribbler.toggleRec)
         self.BlackRec.clicked.connect(self.scribbler.changeBlack)
@@ -202,7 +203,7 @@ class gui(QtGui.QMainWindow, Ui_MainWindow,QtGui.QDialog):
     def save(self,fileName):
         if self.canSave == True:
             self.outputManipulation(fileName)
-    
+
     def outputManipulation(self,fileName):
         splits = fileName.split('/')
         output = '/'.join(splits[:-1])
