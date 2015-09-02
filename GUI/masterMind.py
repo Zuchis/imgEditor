@@ -1,7 +1,7 @@
 import sys
 from PyQt4 import *
 from imageEditor import *
-from PIL import Image
+from PIL import Image, ImageDraw
 
 # TODO
 # Adicionar dialogos para modificação de arquivos, avisar que a imagem não foi binarizada
@@ -28,6 +28,7 @@ class imageProcesser(QtGui.QWidget):
         self.canDrawRec = True
         self.canSave = False
         self.fileName_ = None
+        self.drawnPixels = set()
 
     def openImage(self, fileName):
         loadedImage = QtGui.QImage()
@@ -64,6 +65,9 @@ class imageProcesser(QtGui.QWidget):
         if self.brushToggle == True:
             if event.button() == QtCore.Qt.LeftButton:
                 self.lastPoint = event.pos()
+                x = self.lastPoint.x()
+                y = self.lastPoint.y()
+                self.drawnPixels.add((x,y))
                 self.scribbling = True
         elif self.recToggle == True:
             if event.button() == QtCore.Qt.LeftButton:
@@ -77,11 +81,19 @@ class imageProcesser(QtGui.QWidget):
 
     def mouseMoveEvent(self, event):
         if (event.buttons() & QtCore.Qt.LeftButton) and self.scribbling:
-            self.drawLineTo(event.pos())
+            point = event.pos()
+            x = point.x()
+            y = point.y()
+            self.drawnPixels.add((x,y))
+            self.drawLineTo(point)
 
     def mouseReleaseEvent(self, event):
         if event.button() == QtCore.Qt.LeftButton and self.scribbling:
-            self.drawLineTo(event.pos())
+            point = event.pos()
+            x = point.x()
+            y = point.y()
+            self.drawnPixels.add((x,y))
+            self.drawLineTo(point)
             self.scribbling = False
 
     def paintEvent(self, event):
@@ -154,6 +166,19 @@ class imageProcesser(QtGui.QWidget):
                     img.putpixel((i,j),(255,255,255))
                 else:
                     img.putpixel((i,j),(0,0,0))
+
+        for j in range (yOrigin+offset,yDestin+offset):
+            startPoint = (-1,-1)
+            endPoint = (-1,-1)
+            for i in range (xOrigin+offset,xDestin+offset):
+                if (i,j) in self.drawnPixels:
+                    if startPoint == (-1,-1):
+                        startPoint = (i,j)
+                    elif endPoint == (-1,-1):
+                        endPoint = (i,j)
+                        img.draw.line((startPoint,endPoint),(255,255,255))
+                        startPoint = (-1,-1)
+                        endPoint = (-1,-1)
 
         img.save('temp.png','PNG')
         self.image.load('temp.png')
