@@ -144,7 +144,7 @@ class imageProcesser(QtGui.QWidget):
         yRange = range(yOrigin,yDestin)
         for i in range (0,w):
             for j in range (0,h):
-                if (i <= xOrigin or i>= xDestin) and (j <= yOrigin or j >= yDestin):
+                if i not in xRange or j not in yRange:
                     img.putpixel((i,j),(0,0,0))
 
         for i in range (xOrigin+offset,xDestin+offset):
