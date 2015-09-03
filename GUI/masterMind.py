@@ -164,18 +164,18 @@ class imageProcesser(QtGui.QWidget):
                 else:
                     img.putpixel((i,j),(0,0,0))
 
-        for j in range (yOrigin+offset,yDestin+offset):
-            startPoint = (-1,-1)
-            endPoint = (-1,-1)
-            for i in range (xOrigin+offset,xDestin+offset):
-                if (i,j) in self.drawnPixels:
-                    if startPoint == (-1,-1):
-                        startPoint = (i,j)
-                    elif endPoint == (-1,-1):
-                        endPoint = (i,j)
-                        draw.line((startPoint,endPoint),(255,255,255))
-                        startPoint = (-1,-1)
-                        endPoint = (-1,-1)
+        #for j in range (yOrigin+offset,yDestin+offset):
+            #startPoint = (-1,-1)
+            #endPoint = (-1,-1)
+            #for i in range (xOrigin+offset,xDestin+offset):
+                #if (i,j) in self.drawnPixels:
+                    #if startPoint == (-1,-1):
+                        #startPoint = (i,j)
+                    #elif endPoint == (-1,-1):
+                        #endPoint = (i,j)
+                        #draw.line((startPoint,endPoint),(255,255,255))
+                        #startPoint = (-1,-1)
+                        #endPoint = (-1,-1)
 
         #for set_ in self.drawnPixels:
             #for j in range (yOrigin+offset,yDestin+offset):
@@ -190,8 +190,20 @@ class imageProcesser(QtGui.QWidget):
                 #if startPoint in set_ and endPoint in set_:
                     #draw.line((startPoint,endPoint),(255,255,255))
 
-        #for set_ in self.drawnPixels:
-            #for setMember
+        for set_ in self.drawnPixels:
+            flag = True
+            for j in range (yOrigin+offset,yDestin+offset):
+                if flag == False:
+                    break
+                for i in range (xOrigin+offset,xDestin+offset):
+                    if flag == False:
+                        break
+                    if (i,j) in set_:
+                        neighbors = [(i+1,j),(i+1,j+1),(i,j+1)]
+                        for n in neighbors:
+                            r,g,b = img.getpixel(n)
+                            if n not in set_ and 
+                            #Stop! Hammer time
 
         img.save('temp.png','PNG')
         self.image.load('temp.png')
