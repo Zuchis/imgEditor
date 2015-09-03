@@ -16,7 +16,6 @@ class imageProcesser(QtGui.QWidget):
         self.scribbling = False
         self.myPenWidth = 1
         self.myPenColor = QtCore.Qt.red
-        print (QtCore.Qt.red)
         self.image = QtGui.QImage()
         self.binImage = QtGui.QImage()
         self.lastPoint = QtCore.QPoint()
@@ -28,7 +27,7 @@ class imageProcesser(QtGui.QWidget):
         self.canDrawRec = True
         self.canSave = False
         self.fileName_ = None
-        self.drawnPixels = set()
+        self.drawnPixels = set() 
 
     def openImage(self, fileName):
         loadedImage = QtGui.QImage()
@@ -39,7 +38,6 @@ class imageProcesser(QtGui.QWidget):
         #self.resizeImage(loadedImage, newSize)
         self.image = loadedImage
         self.fileName_ = fileName
-        print(self.image.width(),self.image.height())
         self.modified = False
         self.update()
         return True
@@ -82,17 +80,17 @@ class imageProcesser(QtGui.QWidget):
     def mouseMoveEvent(self, event):
         if (event.buttons() & QtCore.Qt.LeftButton) and self.scribbling:
             point = event.pos()
-            x = point.x()
-            y = point.y()
-            self.drawnPixels.add((x,y))
+            #x = point.x()
+            #y = point.y()
+            #self.drawnPixels.add((x,y))
             self.drawLineTo(point)
 
     def mouseReleaseEvent(self, event):
         if event.button() == QtCore.Qt.LeftButton and self.scribbling:
             point = event.pos()
-            x = point.x()
-            y = point.y()
-            self.drawnPixels.add((x,y))
+            #x = point.x()
+            #y = point.y()
+            #self.drawnPixels.add((x,y))
             self.drawLineTo(point)
             self.scribbling = False
 
@@ -118,13 +116,11 @@ class imageProcesser(QtGui.QWidget):
                     QtCore.Qt.SolidLine, QtCore.Qt.RoundCap, QtCore.Qt.RoundJoin))
             painter.drawLine(self.lastPoint, endPoint)
             self.modified = True
-            #rad = self.myPenWidth / 2 + 2
-            #self.update(QtCore.QRect(self.lastPoint, endPoint).normalized().adjusted(-rad, -rad, +rad, +rad))
             self.update()
-            #print(self.image.width(),self.image.height())
-            #print(self.lastPoint)
+            x = endPoint.x()
+            y = endPoint.y()
+            self.drawnPixels.add((x,y))
             self.lastPoint = QtCore.QPoint(endPoint)
-            #print
 
     def drawRec(self):
         if self.recToggle == True and self.canDrawRec == True:
@@ -146,8 +142,9 @@ class imageProcesser(QtGui.QWidget):
         self.fileName_ = fileNameSave
         self.canSave = True
         img = Image.open(fileNameSave)
+        draw = ImageDraw.Draw(img)
         (w,h) = img.size
-        offset = 0
+        offset = 2
         xOrigin = self.recp1.x()
         xDestin = self.recp2.x()
         yOrigin = self.recp1.y()
@@ -176,9 +173,25 @@ class imageProcesser(QtGui.QWidget):
                         startPoint = (i,j)
                     elif endPoint == (-1,-1):
                         endPoint = (i,j)
-                        img.draw.line((startPoint,endPoint),(255,255,255))
+                        draw.line((startPoint,endPoint),(255,255,255))
                         startPoint = (-1,-1)
                         endPoint = (-1,-1)
+
+        #for set_ in self.drawnPixels:
+            #for j in range (yOrigin+offset,yDestin+offset):
+                #for i in range (xOrigin+offset,xDestin+offset):
+                    #startPoint = (-1,-1)
+                    #endPoint = (-1,-1)
+                    #if (i,j) in set_:
+                        #if startPoint == (-1,-1):
+                            #startPoint = (i,j)
+                        #elif endPoint == (-1,-1):
+                            #endPoint = (i,j)
+                #if startPoint in set_ and endPoint in set_:
+                    #draw.line((startPoint,endPoint),(255,255,255))
+
+        #for set_ in self.drawnPixels:
+            #for setMember
 
         img.save('temp.png','PNG')
         self.image.load('temp.png')
