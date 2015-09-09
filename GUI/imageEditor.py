@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'imageEditor.ui'
 #
-# Created: Mon Aug 31 18:06:43 2015
+# Created: Wed Sep  9 19:54:00 2015
 #      by: PyQt4 UI code generator 4.10.4
 #
 # WARNING! All changes made in this file will be lost!
@@ -42,6 +42,10 @@ class Ui_MainWindow(object):
         icon.addPixmap(QtGui.QPixmap(_fromUtf8("paintbrush.png")), QtGui.QIcon.Normal, QtGui.QIcon.Off)
         self.Brush.setIcon(icon)
         self.Brush.setIconSize(QtCore.QSize(41, 41))
+        self.Brush.setCheckable(False)
+        self.Brush.setAutoDefault(False)
+        self.Brush.setDefault(False)
+        self.Brush.setFlat(False)
         self.Brush.setObjectName(_fromUtf8("Brush"))
         self.Rectangle = QtGui.QPushButton(self.toolBar)
         self.Rectangle.setGeometry(QtCore.QRect(0, 180, 41, 41))
@@ -52,13 +56,29 @@ class Ui_MainWindow(object):
         self.Rectangle.setIconSize(QtCore.QSize(41, 41))
         self.Rectangle.setObjectName(_fromUtf8("Rectangle"))
         self.BlackRec = QtGui.QPushButton(self.toolBar)
-        self.BlackRec.setGeometry(QtCore.QRect(0, 290, 41, 31))
+        self.BlackRec.setGeometry(QtCore.QRect(0, 300, 41, 31))
         self.BlackRec.setText(_fromUtf8(""))
         icon2 = QtGui.QIcon()
         icon2.addPixmap(QtGui.QPixmap(_fromUtf8("blackRec.jpg")), QtGui.QIcon.Normal, QtGui.QIcon.Off)
         self.BlackRec.setIcon(icon2)
         self.BlackRec.setIconSize(QtCore.QSize(41, 41))
         self.BlackRec.setObjectName(_fromUtf8("BlackRec"))
+        self.LineLinker = QtGui.QPushButton(self.toolBar)
+        self.LineLinker.setGeometry(QtCore.QRect(0, 120, 41, 41))
+        self.LineLinker.setText(_fromUtf8(""))
+        icon3 = QtGui.QIcon()
+        icon3.addPixmap(QtGui.QPixmap(_fromUtf8("diagLine.jpg")), QtGui.QIcon.Normal, QtGui.QIcon.Off)
+        self.LineLinker.setIcon(icon3)
+        self.LineLinker.setIconSize(QtCore.QSize(41, 41))
+        self.LineLinker.setObjectName(_fromUtf8("LineLinker"))
+        self.Bucket = QtGui.QPushButton(self.toolBar)
+        self.Bucket.setGeometry(QtCore.QRect(0, 240, 41, 41))
+        self.Bucket.setText(_fromUtf8(""))
+        icon4 = QtGui.QIcon()
+        icon4.addPixmap(QtGui.QPixmap(_fromUtf8("bucket.jpg")), QtGui.QIcon.Normal, QtGui.QIcon.Off)
+        self.Bucket.setIcon(icon4)
+        self.Bucket.setIconSize(QtCore.QSize(41, 41))
+        self.Bucket.setObjectName(_fromUtf8("Bucket"))
         MainWindow.setCentralWidget(self.centralwidget)
         self.menubar = QtGui.QMenuBar(MainWindow)
         self.menubar.setGeometry(QtCore.QRect(0, 0, 1000, 25))
