@@ -5,6 +5,7 @@ from PIL import Image, ImageDraw
 
 # TODO
 # Adicionar dialogos para modificação de arquivos, avisar que a imagem não foi binarizada
+# Adicionar a ferramenta de clique
 
 class imageProcesser(QtGui.QWidget):
     def __init__(self, parent=None):
@@ -28,6 +29,12 @@ class imageProcesser(QtGui.QWidget):
         self.canSave = False
         self.fileName_ = None
         self.drawnPixels = set() 
+        self.img = None 
+        self.rThresh = 200
+        self.gThresh = 50 
+        self.bThresh = 50 
+        self.redpixels = set()
+
 
     def openImage(self, fileName):
         loadedImage = QtGui.QImage()
@@ -38,6 +45,7 @@ class imageProcesser(QtGui.QWidget):
         #self.resizeImage(loadedImage, newSize)
         self.image = loadedImage
         self.fileName_ = fileName
+        self.img = Image.open(self.fileName_)
         self.modified = False
         self.update()
         return True
@@ -110,17 +118,22 @@ class imageProcesser(QtGui.QWidget):
         #super(imageProcesser, self).resizeEvent(event)
 
     def drawLineTo(self, endPoint):
-        if self.brushToggle == True:
-            painter = QtGui.QPainter(self.image)
-            painter.setPen(QtGui.QPen(self.myPenColor, self.myPenWidth,
-                    QtCore.Qt.SolidLine, QtCore.Qt.RoundCap, QtCore.Qt.RoundJoin))
-            painter.drawLine(self.lastPoint, endPoint)
-            self.modified = True
-            self.update()
-            x = endPoint.x()
-            y = endPoint.y()
-            self.drawnPixels.add((x,y))
-            self.lastPoint = QtCore.QPoint(endPoint)
+        if self.fileName_:
+            if self.brushToggle == True:
+                painter = QtGui.QPainter(self.image)
+                painter.setPen(QtGui.QPen(self.myPenColor, self.myPenWidth,
+                        QtCore.Qt.SolidLine, QtCore.Qt.RoundCap, QtCore.Qt.RoundJoin))
+                painter.drawLine(self.lastPoint, endPoint)
+                self.modified = True
+                self.update()
+                x1 = self.lastPoint.x()
+                y1 = self.lastPoint.y()
+                x2 = endPoint.x()
+                y2 = endPoint.y()
+                self.drawnPixels.add((x2,y2))
+                self.lastPoint = QtCore.QPoint(endPoint)
+                draw = ImageDraw.Draw(self.img)
+                draw.line(((x1,y1),(x2,y2)),(255,0,0))
 
     def drawRec(self):
         if self.recToggle == True and self.canDrawRec == True:
@@ -139,11 +152,11 @@ class imageProcesser(QtGui.QWidget):
     def binarize(self):
         fileNameSave = QtGui.QFileDialog.getSaveFileName(self, "Salvar Imagem","/home/untitled.png",("Images (*.png)"))
         self.image.save(fileNameSave)
+        self.img.save('temp.png','PNG')
         self.fileName_ = fileNameSave
         self.canSave = True
-        img = Image.open(fileNameSave)
-        draw = ImageDraw.Draw(img)
-        (w,h) = img.size
+        draw = ImageDraw.Draw(self.img)
+        (w,h) = self.img.size
         offset = 2
         xOrigin = self.recp1.x()
         xDestin = self.recp2.x()
@@ -154,58 +167,17 @@ class imageProcesser(QtGui.QWidget):
         for i in range (0,w):
             for j in range (0,h):
                 if i not in xRange or j not in yRange:
-                    img.putpixel((i,j),(0,0,0))
+                    self.img.putpixel((i,j),(0,0,0))
 
         for i in range (xOrigin+offset,xDestin+offset):
             for j in range (yOrigin+offset,yDestin+offset):
-                r,g,b = img.getpixel((i,j)) 
-                if r > 200:
-                    img.putpixel((i,j),(255,255,255))
-                else:
-                    img.putpixel((i,j),(0,0,0))
+                r,g,b = self.img.getpixel((i,j)) 
+                if r > self.rThresh and g > self.gThresh and b > self.bThresh: #check if it is white
+                    self.img.putpixel((i,j),(255,255,255))
+                elif r < self.rThresh: # if it isn't, check if it is a red one
+                    self.img.putpixel((i,j),(0,0,0))
 
-        #for j in range (yOrigin+offset,yDestin+offset):
-            #startPoint = (-1,-1)
-            #endPoint = (-1,-1)
-            #for i in range (xOrigin+offset,xDestin+offset):
-                #if (i,j) in self.drawnPixels:
-                    #if startPoint == (-1,-1):
-                        #startPoint = (i,j)
-                    #elif endPoint == (-1,-1):
-                        #endPoint = (i,j)
-                        #draw.line((startPoint,endPoint),(255,255,255))
-                        #startPoint = (-1,-1)
-                        #endPoint = (-1,-1)
-
-        #for set_ in self.drawnPixels:
-            #for j in range (yOrigin+offset,yDestin+offset):
-                #for i in range (xOrigin+offset,xDestin+offset):
-                    #startPoint = (-1,-1)
-                    #endPoint = (-1,-1)
-                    #if (i,j) in set_:
-                        #if startPoint == (-1,-1):
-                            #startPoint = (i,j)
-                        #elif endPoint == (-1,-1):
-                            #endPoint = (i,j)
-                #if startPoint in set_ and endPoint in set_:
-                    #draw.line((startPoint,endPoint),(255,255,255))
-
-        for set_ in self.drawnPixels:
-            flag = True
-            for j in range (yOrigin+offset,yDestin+offset):
-                if flag == False:
-                    break
-                for i in range (xOrigin+offset,xDestin+offset):
-                    if flag == False:
-                        break
-                    if (i,j) in set_:
-                        neighbors = [(i+1,j),(i+1,j+1),(i,j+1)]
-                        for n in neighbors:
-                            r,g,b = img.getpixel(n)
-                            if n not in set_ and 
-                            #Stop! Hammer time
-
-        img.save('temp.png','PNG')
+        self.img.save('temp.png','PNG')
         self.image.load('temp.png')
         self.update()
 
@@ -222,19 +194,6 @@ class imageProcesser(QtGui.QWidget):
         self.myPenColor = QtCore.Qt.black
         self.myPenWidth = 3
 
-    def toggleBrush(self):
-        if self.brushToggle == False:
-            self.brushToggle = True
-            self.recToggle = False
-        else:
-            self.brushToggle = False
-
-    def toggleRec(self):
-        if self.recToggle == False:
-            self.recToggle = True
-            self.brushToggle = False
-        else:
-            self.recToggle = False
 
 class gui(QtGui.QMainWindow, Ui_MainWindow,QtGui.QDialog):
     def __init__(self, parent=None):
@@ -245,8 +204,10 @@ class gui(QtGui.QMainWindow, Ui_MainWindow,QtGui.QDialog):
         QtCore.QObject.connect(self.actionDeletar, QtCore.SIGNAL(("activated()")), self.scribbler.clearImage)
         QtCore.QObject.connect(self.actionSalvar, QtCore.SIGNAL(("activated()")), self.save)
         QtCore.QObject.connect(self.actionFinalizar_Demarca_o, QtCore.SIGNAL(("activated()")), self.scribbler.binarize)
-        self.Brush.clicked.connect(self.scribbler.toggleBrush)
-        self.Rectangle.clicked.connect(self.scribbler.toggleRec)
+        self.Brush.clicked.connect(self.toggleBrush)
+        self.Rectangle.clicked.connect(self.toggleRec)
+        self.LineLinker.clicked.connect(self.toggleLines)
+        self.Bucket.clicked.connect(self.toggleBucket)
         self.BlackRec.clicked.connect(self.scribbler.changeBlack)
         self.f = None
         #self.setCentralWidget(self.scribbler)
@@ -283,3 +244,19 @@ class gui(QtGui.QMainWindow, Ui_MainWindow,QtGui.QDialog):
                 else:
                     self.f.write('0')
             self.f.write('\n')
+
+    def toggleBrush(self):
+        if self.scribbler.brushToggle == False:
+            self.Brush.setDefault(True)
+            self.scribbler.brushToggle = True
+            self.scribbler.recToggle = False
+        else:
+            self.Brush.setDefault(False)
+            self.scribbler.brushToggle = False
+
+    def toggleRec(self):
+        if self.scribbler.recToggle == False:
+            self.scribbler.recToggle = True
+            self.scribbler.brushToggle = False
+        else:
+            self.scribbler.recToggle = False
