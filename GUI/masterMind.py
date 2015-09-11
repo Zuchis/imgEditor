@@ -25,6 +25,8 @@ class imageProcesser(QtGui.QWidget):
         self.pointNull = QtCore.QPoint(-1,-1)
         self.brushToggle = False
         self.recToggle = False
+        self.lineToggle = False
+        self.bucketToggle = False
         self.canDrawRec = True
         self.canSave = False
         self.fileName_ = None
@@ -33,7 +35,7 @@ class imageProcesser(QtGui.QWidget):
         self.rThresh = 200
         self.gThresh = 50 
         self.bThresh = 50 
-        self.redpixels = set()
+        self.linePoints = []
 
 
     def openImage(self, fileName):
@@ -84,6 +86,14 @@ class imageProcesser(QtGui.QWidget):
                    self.recp2 = event.pos()
                    #print (self.recp2)
                    self.drawRec()
+        elif self.lineToggle == True:
+            if event.button() == QtCore.Qt.LeftButton:
+                point = event.pos()
+                x = point.x()
+                y = point.y()
+                self.linePoints.append((x,y))
+                self.drawBetween()
+
 
     def mouseMoveEvent(self, event):
         if (event.buttons() & QtCore.Qt.LeftButton) and self.scribbling:
@@ -142,7 +152,7 @@ class imageProcesser(QtGui.QWidget):
             w = self.recp2.x() - self.recp1.x()
             h = self.recp2.y() - self.recp1.y()
             painter = QtGui.QPainter(self.image)
-            painter.setPen(QtGui.QPen(self.myPenColor, self.myPenWidth,
+            painter.setPen(QtGui.QPen(QtCore.Qt.red, self.myPenWidth,
                     QtCore.Qt.SolidLine, QtCore.Qt.RoundCap, QtCore.Qt.RoundJoin))
             painter.drawRect(x,y,w,h)
             self.modified = True
@@ -250,13 +260,41 @@ class gui(QtGui.QMainWindow, Ui_MainWindow,QtGui.QDialog):
             self.Brush.setDefault(True)
             self.scribbler.brushToggle = True
             self.scribbler.recToggle = False
+            self.scribbler.lineToggle = False
+            self.scribbler.bucketToggle = False
         else:
             self.Brush.setDefault(False)
             self.scribbler.brushToggle = False
 
     def toggleRec(self):
         if self.scribbler.recToggle == False:
+            self.Rectangle.setDefault(True)
             self.scribbler.recToggle = True
             self.scribbler.brushToggle = False
+            self.scribbler.lineToggle = False
+            self.scribbler.bucketToggle = False
         else:
+            self.Rectangle.setDefault(False)
             self.scribbler.recToggle = False
+
+    def toggleLines(self):
+        if self.scribbler.lineToggle == False:
+            self.LineLinker.setDefault(True)
+            self.scribbler.recToggle = False
+            self.scribbler.brushToggle = False
+            self.scribbler.lineToggle = True
+            self.scribbler.bucketToggle = False
+        else:
+            self.LineLinker.setDefault(False)
+            self.scribbler.lineToggle = False
+
+    def toggleBucket(self):
+        if self.scribbler.bucketToggle == False:
+            self.Bucket.setDefault(True)
+            self.scribbler.recToggle = False
+            self.scribbler.brushToggle = False
+            self.scribbler.lineToggle = False
+            self.scribbler.bucketToggle = True
+        else:
+            self.Bucket.setDefault(False)
+            self.scribbler.bucketToggle = False

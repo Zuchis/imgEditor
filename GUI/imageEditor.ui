@@ -43,8 +43,8 @@
       <rect>
        <x>0</x>
        <y>60</y>
-       <width>41</width>
-       <height>41</height>
+       <width>50</width>
+       <height>50</height>
       </rect>
      </property>
      <property name="text">
@@ -56,8 +56,8 @@
      </property>
      <property name="iconSize">
       <size>
-       <width>41</width>
-       <height>41</height>
+       <width>35</width>
+       <height>35</height>
       </size>
      </property>
      <property name="checkable">
@@ -78,8 +78,8 @@
       <rect>
        <x>0</x>
        <y>180</y>
-       <width>41</width>
-       <height>41</height>
+       <width>50</width>
+       <height>50</height>
       </rect>
      </property>
      <property name="text">
@@ -91,8 +91,8 @@
      </property>
      <property name="iconSize">
       <size>
-       <width>41</width>
-       <height>41</height>
+       <width>35</width>
+       <height>35</height>
       </size>
      </property>
     </widget>
@@ -100,9 +100,9 @@
      <property name="geometry">
       <rect>
        <x>0</x>
-       <y>300</y>
-       <width>41</width>
-       <height>31</height>
+       <y>320</y>
+       <width>45</width>
+       <height>35</height>
       </rect>
      </property>
      <property name="text">
@@ -114,8 +114,8 @@
      </property>
      <property name="iconSize">
       <size>
-       <width>41</width>
-       <height>41</height>
+       <width>45</width>
+       <height>45</height>
       </size>
      </property>
     </widget>
@@ -124,8 +124,8 @@
       <rect>
        <x>0</x>
        <y>120</y>
-       <width>41</width>
-       <height>41</height>
+       <width>50</width>
+       <height>50</height>
       </rect>
      </property>
      <property name="text">
@@ -133,12 +133,12 @@
      </property>
      <property name="icon">
       <iconset>
-       <normaloff>diagLine.jpg</normaloff>diagLine.jpg</iconset>
+       <normaloff>diagLine.png</normaloff>diagLine.png</iconset>
      </property>
      <property name="iconSize">
       <size>
-       <width>41</width>
-       <height>41</height>
+       <width>35</width>
+       <height>35</height>
       </size>
      </property>
     </widget>
@@ -147,8 +147,8 @@
       <rect>
        <x>0</x>
        <y>240</y>
-       <width>41</width>
-       <height>41</height>
+       <width>50</width>
+       <height>50</height>
       </rect>
      </property>
      <property name="text">
@@ -156,12 +156,12 @@
      </property>
      <property name="icon">
       <iconset>
-       <normaloff>bucket.jpg</normaloff>bucket.jpg</iconset>
+       <normaloff>bucket.png</normaloff>bucket.png</iconset>
      </property>
      <property name="iconSize">
       <size>
-       <width>41</width>
-       <height>41</height>
+       <width>35</width>
+       <height>35</height>
       </size>
      </property>
     </widget>
