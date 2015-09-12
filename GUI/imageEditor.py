@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'imageEditor.ui'
 #
-# Created: Fri Sep 11 16:24:50 2015
+# Created: Sat Sep 12 19:34:09 2015
 #      by: PyQt4 UI code generator 4.10.4
 #
 # WARNING! All changes made in this file will be lost!
@@ -87,6 +87,8 @@ class Ui_MainWindow(object):
         self.menuArquivo.setObjectName(_fromUtf8("menuArquivo"))
         self.menuSobre = QtGui.QMenu(self.menubar)
         self.menuSobre.setObjectName(_fromUtf8("menuSobre"))
+        self.menuEditar = QtGui.QMenu(self.menubar)
+        self.menuEditar.setObjectName(_fromUtf8("menuEditar"))
         MainWindow.setMenuBar(self.menubar)
         self.actionAbrir = QtGui.QAction(MainWindow)
         self.actionAbrir.setObjectName(_fromUtf8("actionAbrir"))
@@ -98,12 +100,16 @@ class Ui_MainWindow(object):
         self.actionSair.setObjectName(_fromUtf8("actionSair"))
         self.actionFinalizar_Demarca_o = QtGui.QAction(MainWindow)
         self.actionFinalizar_Demarca_o.setObjectName(_fromUtf8("actionFinalizar_Demarca_o"))
+        self.actionDesfazer = QtGui.QAction(MainWindow)
+        self.actionDesfazer.setObjectName(_fromUtf8("actionDesfazer"))
         self.menuArquivo.addAction(self.actionAbrir)
         self.menuArquivo.addAction(self.actionFinalizar_Demarca_o)
         self.menuArquivo.addAction(self.actionSalvar)
         self.menuArquivo.addAction(self.actionDeletar)
         self.menuArquivo.addAction(self.actionSair)
+        self.menuEditar.addAction(self.actionDesfazer)
         self.menubar.addAction(self.menuArquivo.menuAction())
+        self.menubar.addAction(self.menuEditar.menuAction())
         self.menubar.addAction(self.menuSobre.menuAction())
 
         self.retranslateUi(MainWindow)
@@ -114,9 +120,19 @@ class Ui_MainWindow(object):
         MainWindow.setWindowTitle(_translate("MainWindow", "MainWindow", None))
         self.menuArquivo.setTitle(_translate("MainWindow", "Arquivo", None))
         self.menuSobre.setTitle(_translate("MainWindow", "Sobre", None))
+        self.menuEditar.setTitle(_translate("MainWindow", "Editar", None))
         self.actionAbrir.setText(_translate("MainWindow", "Abrir...", None))
+        self.actionAbrir.setToolTip(_translate("MainWindow", "Abrir Imagem", None))
+        self.actionAbrir.setShortcut(_translate("MainWindow", "Ctrl+O", None))
         self.actionSalvar.setText(_translate("MainWindow", "Salvar...", None))
+        self.actionSalvar.setShortcut(_translate("MainWindow", "Ctrl+S", None))
         self.actionDeletar.setText(_translate("MainWindow", "Deletar", None))
+        self.actionDeletar.setToolTip(_translate("MainWindow", "Deletar Imagem", None))
+        self.actionDeletar.setShortcut(_translate("MainWindow", "Ctrl+L", None))
         self.actionSair.setText(_translate("MainWindow", "Sair", None))
+        self.actionSair.setShortcut(_translate("MainWindow", "Ctrl+D", None))
         self.actionFinalizar_Demarca_o.setText(_translate("MainWindow", "Finalizar Demarcação", None))
+        self.actionFinalizar_Demarca_o.setShortcut(_translate("MainWindow", "Ctrl+B", None))
+        self.actionDesfazer.setText(_translate("MainWindow", "Desfazer", None))
+        self.actionDesfazer.setShortcut(_translate("MainWindow", "Ctrl+Z", None))
 

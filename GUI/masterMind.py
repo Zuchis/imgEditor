@@ -2,6 +2,7 @@ import sys
 from PyQt4 import *
 from imageEditor import *
 from PIL import Image, ImageDraw
+from copy import *
 
 # TODO
 # Adicionar dialogos para modificação de arquivos, avisar que a imagem não foi binarizada
@@ -36,6 +37,7 @@ class imageProcesser(QtGui.QWidget):
         self.gThresh = 50 
         self.bThresh = 50 
         self.linePoints = []
+        self.imgList = []
 
 
     def openImage(self, fileName):
@@ -93,6 +95,12 @@ class imageProcesser(QtGui.QWidget):
                 y = point.y()
                 self.linePoints.append((x,y))
                 self.drawBetween()
+        elif self.bucketToggle == True:
+            if event.button() == QtCore.Qt.LeftButton:
+                point = event.pos()
+                x = point.x()
+                y = point.y()
+                self.floodFill((x,y))
 
 
     def mouseMoveEvent(self, event):
@@ -116,6 +124,43 @@ class imageProcesser(QtGui.QWidget):
         painter = QtGui.QPainter(self)
         painter.drawImage(event.rect(), self.image)
 
+    def drawBetween(self):
+        if len(self.linePoints) > 1:
+            self.imgList.append(self.image.copy())
+            painter = QtGui.QPainter(self.image)
+            painter.setPen(QtGui.QPen(QtCore.Qt.red, self.myPenWidth,
+                    QtCore.Qt.SolidLine, QtCore.Qt.RoundCap, QtCore.Qt.RoundJoin))
+            start = self.linePoints[len(self.linePoints)-2]
+            x1,y1 = start
+            start = QtCore.QPoint(start[0],start[1])
+            end = self.linePoints[len(self.linePoints)-1]
+            x2,y2 = end
+            end = QtCore.QPoint(end[0],end[1])
+            painter.drawLine(start,end)
+            draw = ImageDraw.Draw(self.img)
+            draw.line(((x1,y1),(x2,y2)),(255,0,0))
+            self.modified = True
+            self.update()
+
+    def floodFill(self,pixel):
+        pStack = [pixel]
+        while len(pStack) > 0:
+            x,y = pStack.pop()
+            r,g,b = self.img.getpixel((x,y))
+            if r > self.rThresh and g < self.gThresh and b < self.bThresh:
+                pass
+            else:
+                self.img.putpixel((x,y),(255,255,255))
+                pStack.append((x + 1, y))
+                pStack.append((x - 1, y))
+                pStack.append((x, y + 1))
+                pStack.append((x, y - 1))
+        self.modified = True
+        self.img.save('temp.png','PNG')
+        self.image.load('temp.png')
+        self.update()
+
+            
 
     #def resizeEvent(self, event):
         #if self.width() > self.image.width() or self.height() > self.image.height():
@@ -204,16 +249,21 @@ class imageProcesser(QtGui.QWidget):
         self.myPenColor = QtCore.Qt.black
         self.myPenWidth = 3
 
+    def undo(self):
+        if len(self.imgList) > 0:
+            self.image = QtGui.QImage(self.imgList.pop())
+            self.update()
 
 class gui(QtGui.QMainWindow, Ui_MainWindow,QtGui.QDialog):
     def __init__(self, parent=None):
         QtGui.QMainWindow.__init__(self)
         self.setupUi(self)
-        QtCore.QObject.connect(self.actionAbrir, QtCore.SIGNAL(("activated()")), self.openFile)
         self.scribbler = imageProcesser(self.centralwidget)
+        QtCore.QObject.connect(self.actionAbrir, QtCore.SIGNAL(("activated()")), self.openFile)
         QtCore.QObject.connect(self.actionDeletar, QtCore.SIGNAL(("activated()")), self.scribbler.clearImage)
         QtCore.QObject.connect(self.actionSalvar, QtCore.SIGNAL(("activated()")), self.save)
         QtCore.QObject.connect(self.actionFinalizar_Demarca_o, QtCore.SIGNAL(("activated()")), self.scribbler.binarize)
+        QtCore.QObject.connect(self.actionDesfazer, QtCore.SIGNAL(("activated()")), self.scribbler.undo)
         self.Brush.clicked.connect(self.toggleBrush)
         self.Rectangle.clicked.connect(self.toggleRec)
         self.LineLinker.clicked.connect(self.toggleLines)
@@ -261,6 +311,7 @@ class gui(QtGui.QMainWindow, Ui_MainWindow,QtGui.QDialog):
             self.scribbler.brushToggle = True
             self.scribbler.recToggle = False
             self.scribbler.lineToggle = False
+            del self.scribbler.linePoints[:]
             self.scribbler.bucketToggle = False
         else:
             self.Brush.setDefault(False)
@@ -272,6 +323,7 @@ class gui(QtGui.QMainWindow, Ui_MainWindow,QtGui.QDialog):
             self.scribbler.recToggle = True
             self.scribbler.brushToggle = False
             self.scribbler.lineToggle = False
+            del self.scribbler.linePoints[:]
             self.scribbler.bucketToggle = False
         else:
             self.Rectangle.setDefault(False)
@@ -287,6 +339,7 @@ class gui(QtGui.QMainWindow, Ui_MainWindow,QtGui.QDialog):
         else:
             self.LineLinker.setDefault(False)
             self.scribbler.lineToggle = False
+            del self.scribbler.linePoints[:]
 
     def toggleBucket(self):
         if self.scribbler.bucketToggle == False:
@@ -294,6 +347,7 @@ class gui(QtGui.QMainWindow, Ui_MainWindow,QtGui.QDialog):
             self.scribbler.recToggle = False
             self.scribbler.brushToggle = False
             self.scribbler.lineToggle = False
+            del self.scribbler.linePoints[:]
             self.scribbler.bucketToggle = True
         else:
             self.Bucket.setDefault(False)

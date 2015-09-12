@@ -191,32 +191,68 @@
      <string>Sobre</string>
     </property>
    </widget>
+   <widget class="QMenu" name="menuEditar">
+    <property name="title">
+     <string>Editar</string>
+    </property>
+    <addaction name="actionDesfazer"/>
+   </widget>
    <addaction name="menuArquivo"/>
+   <addaction name="menuEditar"/>
    <addaction name="menuSobre"/>
   </widget>
   <action name="actionAbrir">
    <property name="text">
     <string>Abrir...</string>
    </property>
+   <property name="toolTip">
+    <string>Abrir Imagem</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+O</string>
+   </property>
   </action>
   <action name="actionSalvar">
    <property name="text">
     <string>Salvar...</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+S</string>
    </property>
   </action>
   <action name="actionDeletar">
    <property name="text">
     <string>Deletar</string>
    </property>
+   <property name="toolTip">
+    <string>Deletar Imagem</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+L</string>
+   </property>
   </action>
   <action name="actionSair">
    <property name="text">
     <string>Sair</string>
    </property>
+   <property name="shortcut">
+    <string>Ctrl+D</string>
+   </property>
   </action>
   <action name="actionFinalizar_Demarca_o">
    <property name="text">
     <string>Finalizar Demarcação</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+B</string>
+   </property>
+  </action>
+  <action name="actionDesfazer">
+   <property name="text">
+    <string>Desfazer</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+Z</string>
    </property>
   </action>
  </widget>
