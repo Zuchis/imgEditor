@@ -144,17 +144,20 @@ class imageProcesser(QtGui.QWidget):
 
     def floodFill(self,pixel):
         pStack = [pixel]
+        processedPixels = set()
         while len(pStack) > 0:
             x,y = pStack.pop()
-            r,g,b = self.img.getpixel((x,y))
-            if r > self.rThresh and g < self.gThresh and b < self.bThresh:
-                pass
-            else:
-                self.img.putpixel((x,y),(255,255,255))
-                pStack.append((x + 1, y))
-                pStack.append((x - 1, y))
-                pStack.append((x, y + 1))
-                pStack.append((x, y - 1))
+            if (x,y) not in processedPixels:
+                r,g,b = self.img.getpixel((x,y))
+                processedPixels.add((x,y))
+                if r > self.rThresh and g < self.gThresh and b < self.bThresh: # check if the pixel is red
+                    self.img.putpixel((x,y),(255,255,255))
+                else:
+                    self.img.putpixel((x,y),(255,255,255))
+                    pStack.append((x + 1, y))
+                    pStack.append((x - 1, y))
+                    pStack.append((x, y + 1))
+                    pStack.append((x, y - 1))
         self.modified = True
         self.img.save('temp.png','PNG')
         self.image.load('temp.png')
