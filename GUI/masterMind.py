@@ -5,13 +5,12 @@ from PIL import Image, ImageDraw
 from copy import *
 
 # TODO
-# Adicionar dialogos para modificação de arquivos, avisar que a imagem não foi binarizada
-# Adicionar a ferramenta de clique
+# Adicionar dialogos para: modificação de arquivos; avisar que a imagem não foi binarizada
+# Adicionar ferramenta de zoom
 
 class imageProcesser(QtGui.QWidget):
-    def __init__(self, parent=None):
+    def __init__(self,parent = None):
         super(imageProcesser, self).__init__(parent)
-
         self.setAttribute(QtCore.Qt.WA_StaticContents)
         self.setGeometry(50,0,950,1000)
         self.modified = False
@@ -126,7 +125,7 @@ class imageProcesser(QtGui.QWidget):
 
     def drawBetween(self):
         if len(self.linePoints) > 1:
-            self.imgList.append(self.image.copy())
+            self.imgList.append((self.image.copy(),self.img.copy(),2)) #add the instance for the undo function
             painter = QtGui.QPainter(self.image)
             painter.setPen(QtGui.QPen(QtCore.Qt.red, self.myPenWidth,
                     QtCore.Qt.SolidLine, QtCore.Qt.RoundCap, QtCore.Qt.RoundJoin))
@@ -143,6 +142,7 @@ class imageProcesser(QtGui.QWidget):
             self.update()
 
     def floodFill(self,pixel):
+        self.imgList.append((self.image.copy(),self.img.copy(),0)) #add the instance for the undo function
         pStack = [pixel]
         processedPixels = set()
         while len(pStack) > 0:
@@ -195,19 +195,25 @@ class imageProcesser(QtGui.QWidget):
 
     def drawRec(self):
         if self.recToggle == True and self.canDrawRec == True:
+            self.imgList.append((self.image.copy(),self.img.copy(),1)) #add the instance for the undo function
             x = self.recp1.x()
             y = self.recp1.y()
             w = self.recp2.x() - self.recp1.x()
             h = self.recp2.y() - self.recp1.y()
+            x2 = self.recp2.x()
+            y2 = self.recp2.y()
             painter = QtGui.QPainter(self.image)
             painter.setPen(QtGui.QPen(QtCore.Qt.red, self.myPenWidth,
                     QtCore.Qt.SolidLine, QtCore.Qt.RoundCap, QtCore.Qt.RoundJoin))
             painter.drawRect(x,y,w,h)
+            draw = ImageDraw.Draw(self.img)
+            draw.rectangle(((x,y),(x2,y2)),None,(255,0,0))
             self.modified = True
             self.canDrawRec = False
             self.update()
 
     def binarize(self):
+        self.imgList.append((self.image.copy(),self.img.copy(),0)) #add the instance for the undo function
         fileNameSave = QtGui.QFileDialog.getSaveFileName(self, "Salvar Imagem","/home/untitled.png",("Images (*.png)"))
         self.image.save(fileNameSave)
         self.img.save('temp.png','PNG')
@@ -254,7 +260,12 @@ class imageProcesser(QtGui.QWidget):
 
     def undo(self):
         if len(self.imgList) > 0:
-            self.image = QtGui.QImage(self.imgList.pop())
+            self.image,self.img,ret = self.imgList.pop()
+            if len(self.linePoints) > 0 and ret == 2:
+                del self.linePoints[-1:]
+            elif ret == 1:
+                self.recp1 = self.recp2 = self.pointNull
+                self.canDrawRec = True
             self.update()
 
 class gui(QtGui.QMainWindow, Ui_MainWindow,QtGui.QDialog):
@@ -273,7 +284,6 @@ class gui(QtGui.QMainWindow, Ui_MainWindow,QtGui.QDialog):
         self.Bucket.clicked.connect(self.toggleBucket)
         self.BlackRec.clicked.connect(self.scribbler.changeBlack)
         self.f = None
-        #self.setCentralWidget(self.scribbler)
 
     def openFile(self):
         fileName = QtGui.QFileDialog.getOpenFileName(self, "Abrir Imagem")
