@@ -181,9 +181,8 @@
      <string>Arquivo</string>
     </property>
     <addaction name="actionAbrir"/>
-    <addaction name="actionFinalizar_Demarca_o"/>
     <addaction name="actionSalvar"/>
-    <addaction name="actionDeletar"/>
+    <addaction name="separator"/>
     <addaction name="actionSair"/>
    </widget>
    <widget class="QMenu" name="menuSobre">
@@ -195,7 +194,18 @@
     <property name="title">
      <string>Editar</string>
     </property>
+    <widget class="QMenu" name="menuReduzir">
+     <property name="title">
+      <string>Reduzir...</string>
+     </property>
+     <addaction name="actionReduzir_uma_vez"/>
+     <addaction name="actionTamanho_Original"/>
+    </widget>
+    <addaction name="actionDeletar"/>
+    <addaction name="actionFinalizar_Demarca_o"/>
     <addaction name="actionDesfazer"/>
+    <addaction name="actionAmpliar"/>
+    <addaction name="menuReduzir"/>
    </widget>
    <addaction name="menuArquivo"/>
    <addaction name="menuEditar"/>
@@ -253,6 +263,30 @@
    </property>
    <property name="shortcut">
     <string>Ctrl+Z</string>
+   </property>
+  </action>
+  <action name="actionAmpliar">
+   <property name="text">
+    <string>Ampliar</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+=</string>
+   </property>
+  </action>
+  <action name="actionReduzir_uma_vez">
+   <property name="text">
+    <string>Reduzir uma vez</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+-</string>
+   </property>
+  </action>
+  <action name="actionTamanho_Original">
+   <property name="text">
+    <string>Tamanho Original</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+R</string>
    </property>
   </action>
  </widget>

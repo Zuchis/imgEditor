@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'imageEditor.ui'
 #
-# Created: Sat Sep 12 19:34:09 2015
+# Created: Tue Sep 15 17:39:48 2015
 #      by: PyQt4 UI code generator 4.10.4
 #
 # WARNING! All changes made in this file will be lost!
@@ -89,6 +89,8 @@ class Ui_MainWindow(object):
         self.menuSobre.setObjectName(_fromUtf8("menuSobre"))
         self.menuEditar = QtGui.QMenu(self.menubar)
         self.menuEditar.setObjectName(_fromUtf8("menuEditar"))
+        self.menuReduzir = QtGui.QMenu(self.menuEditar)
+        self.menuReduzir.setObjectName(_fromUtf8("menuReduzir"))
         MainWindow.setMenuBar(self.menubar)
         self.actionAbrir = QtGui.QAction(MainWindow)
         self.actionAbrir.setObjectName(_fromUtf8("actionAbrir"))
@@ -102,12 +104,23 @@ class Ui_MainWindow(object):
         self.actionFinalizar_Demarca_o.setObjectName(_fromUtf8("actionFinalizar_Demarca_o"))
         self.actionDesfazer = QtGui.QAction(MainWindow)
         self.actionDesfazer.setObjectName(_fromUtf8("actionDesfazer"))
+        self.actionAmpliar = QtGui.QAction(MainWindow)
+        self.actionAmpliar.setObjectName(_fromUtf8("actionAmpliar"))
+        self.actionReduzir_uma_vez = QtGui.QAction(MainWindow)
+        self.actionReduzir_uma_vez.setObjectName(_fromUtf8("actionReduzir_uma_vez"))
+        self.actionTamanho_Original = QtGui.QAction(MainWindow)
+        self.actionTamanho_Original.setObjectName(_fromUtf8("actionTamanho_Original"))
         self.menuArquivo.addAction(self.actionAbrir)
-        self.menuArquivo.addAction(self.actionFinalizar_Demarca_o)
         self.menuArquivo.addAction(self.actionSalvar)
-        self.menuArquivo.addAction(self.actionDeletar)
+        self.menuArquivo.addSeparator()
         self.menuArquivo.addAction(self.actionSair)
+        self.menuReduzir.addAction(self.actionReduzir_uma_vez)
+        self.menuReduzir.addAction(self.actionTamanho_Original)
+        self.menuEditar.addAction(self.actionDeletar)
+        self.menuEditar.addAction(self.actionFinalizar_Demarca_o)
         self.menuEditar.addAction(self.actionDesfazer)
+        self.menuEditar.addAction(self.actionAmpliar)
+        self.menuEditar.addAction(self.menuReduzir.menuAction())
         self.menubar.addAction(self.menuArquivo.menuAction())
         self.menubar.addAction(self.menuEditar.menuAction())
         self.menubar.addAction(self.menuSobre.menuAction())
@@ -121,6 +134,7 @@ class Ui_MainWindow(object):
         self.menuArquivo.setTitle(_translate("MainWindow", "Arquivo", None))
         self.menuSobre.setTitle(_translate("MainWindow", "Sobre", None))
         self.menuEditar.setTitle(_translate("MainWindow", "Editar", None))
+        self.menuReduzir.setTitle(_translate("MainWindow", "Reduzir...", None))
         self.actionAbrir.setText(_translate("MainWindow", "Abrir...", None))
         self.actionAbrir.setToolTip(_translate("MainWindow", "Abrir Imagem", None))
         self.actionAbrir.setShortcut(_translate("MainWindow", "Ctrl+O", None))
@@ -135,4 +149,10 @@ class Ui_MainWindow(object):
         self.actionFinalizar_Demarca_o.setShortcut(_translate("MainWindow", "Ctrl+B", None))
         self.actionDesfazer.setText(_translate("MainWindow", "Desfazer", None))
         self.actionDesfazer.setShortcut(_translate("MainWindow", "Ctrl+Z", None))
+        self.actionAmpliar.setText(_translate("MainWindow", "Ampliar", None))
+        self.actionAmpliar.setShortcut(_translate("MainWindow", "Ctrl+=", None))
+        self.actionReduzir_uma_vez.setText(_translate("MainWindow", "Reduzir uma vez", None))
+        self.actionReduzir_uma_vez.setShortcut(_translate("MainWindow", "Ctrl+-", None))
+        self.actionTamanho_Original.setText(_translate("MainWindow", "Tamanho Original", None))
+        self.actionTamanho_Original.setShortcut(_translate("MainWindow", "Ctrl+R", None))
 

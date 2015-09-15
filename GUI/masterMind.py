@@ -8,7 +8,7 @@ from copy import *
 # Adicionar dialogos para: modificação de arquivos; avisar que a imagem não foi binarizada
 # Adicionar ferramenta de zoom
 
-class imageProcesser(QtGui.QWidget):
+class imageProcesser(QtGui.QWidget,QtGui.QWheelEvent):
     def __init__(self,parent = None):
         super(imageProcesser, self).__init__(parent)
         self.setAttribute(QtCore.Qt.WA_StaticContents)
@@ -37,6 +37,7 @@ class imageProcesser(QtGui.QWidget):
         self.bThresh = 50 
         self.linePoints = []
         self.imgList = []
+        self.originalSize = None
 
 
     def openImage(self, fileName):
@@ -51,6 +52,7 @@ class imageProcesser(QtGui.QWidget):
         self.img = Image.open(self.fileName_)
         self.modified = False
         self.update()
+        self.originalSize = self.img.size
         return True
 
     def saveImage(self,fileName,fileFormat):
@@ -68,7 +70,15 @@ class imageProcesser(QtGui.QWidget):
         self.canDrawRec = True
         self.recp1 = self.pointNull
         self.recp2 = self.pointNull
+        del self.linePoints[:]
         self.update()
+
+    def wheelEvent(self,event):
+        delta = event.delta()
+        if delta > 0:
+            self.zoom()
+        else:
+            self.zoomOut()
 
     def mousePressEvent(self, event):
         if self.brushToggle == True:
@@ -268,16 +278,52 @@ class imageProcesser(QtGui.QWidget):
                 self.canDrawRec = True
             self.update()
 
+    def zoom(self):
+        w = int(self.image.width() * 1.2)
+        h = int(self.image.height() * 1.2)
+        if w < 1000 and h < 1000:
+            self.img = self.img.resize((w,h))
+            self.img.save('temp.png','PNG')
+            self.setGeometry(50,0,w,h)
+            self.image.load('temp.png')
+            self.update()
+
+    def zoomOut(self):
+        w = float(self.image.width()) / 1.2
+        w = int(round(w))
+        h = float(self.image.height()) / 1.2
+        h = int(round(h))
+        if w > self.originalSize[0] and h > self.originalSize[1]:
+            self.img = self.img.resize((w,h))
+            self.img.save('temp.png','PNG')
+            self.setGeometry(50,0,w,h)
+            self.image.load('temp.png')
+            self.update()
+
+    def setOriginalSize(self):
+        w,h = self.originalSize
+        self.img = self.img.resize((w,h))
+        self.img.save('temp.png','PNG')
+        self.setGeometry(50,0,w,h)
+        self.image.load('temp.png')
+        self.update()
+
 class gui(QtGui.QMainWindow, Ui_MainWindow,QtGui.QDialog):
     def __init__(self, parent=None):
         QtGui.QMainWindow.__init__(self)
+
         self.setupUi(self)
         self.scribbler = imageProcesser(self.centralwidget)
+
         QtCore.QObject.connect(self.actionAbrir, QtCore.SIGNAL(("activated()")), self.openFile)
         QtCore.QObject.connect(self.actionDeletar, QtCore.SIGNAL(("activated()")), self.scribbler.clearImage)
         QtCore.QObject.connect(self.actionSalvar, QtCore.SIGNAL(("activated()")), self.save)
         QtCore.QObject.connect(self.actionFinalizar_Demarca_o, QtCore.SIGNAL(("activated()")), self.scribbler.binarize)
         QtCore.QObject.connect(self.actionDesfazer, QtCore.SIGNAL(("activated()")), self.scribbler.undo)
+        QtCore.QObject.connect(self.actionAmpliar, QtCore.SIGNAL(("activated()")), self.scribbler.zoom)
+        QtCore.QObject.connect(self.actionReduzir_uma_vez, QtCore.SIGNAL(("activated()")), self.scribbler.zoomOut)
+        QtCore.QObject.connect(self.actionTamanho_Original, QtCore.SIGNAL(("activated()")), self.scribbler.setOriginalSize)
+
         self.Brush.clicked.connect(self.toggleBrush)
         self.Rectangle.clicked.connect(self.toggleRec)
         self.LineLinker.clicked.connect(self.toggleLines)
