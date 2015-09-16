@@ -15,7 +15,7 @@ class imageProcesser(QtGui.QWidget,QtGui.QWheelEvent):
         self.setGeometry(50,0,950,1000)
         self.modified = False
         self.scribbling = False
-        self.myPenWidth = 1
+        self.myPenWidth = 3
         self.myPenColor = QtCore.Qt.red
         self.image = QtGui.QImage()
         self.binImage = QtGui.QImage()
@@ -32,12 +32,13 @@ class imageProcesser(QtGui.QWidget,QtGui.QWheelEvent):
         self.fileName_ = None
         self.drawnPixels = set() 
         self.img = None 
-        self.rThresh = 200
+        self.rThresh = 110
         self.gThresh = 50 
         self.bThresh = 50 
         self.linePoints = []
         self.imgList = []
         self.originalSize = None
+        self.zoomFactor = 1.15
 
 
     def openImage(self, fileName):
@@ -50,6 +51,7 @@ class imageProcesser(QtGui.QWidget,QtGui.QWheelEvent):
         self.image = loadedImage
         self.fileName_ = fileName
         self.img = Image.open(self.fileName_)
+        
         self.modified = False
         self.update()
         self.originalSize = self.img.size
@@ -70,15 +72,17 @@ class imageProcesser(QtGui.QWidget,QtGui.QWheelEvent):
         self.canDrawRec = True
         self.recp1 = self.pointNull
         self.recp2 = self.pointNull
+        self.img = None
         del self.linePoints[:]
         self.update()
 
     def wheelEvent(self,event):
-        delta = event.delta()
-        if delta > 0:
-            self.zoom()
-        else:
-            self.zoomOut()
+        if self.fileName_:
+            delta = event.delta()
+            if delta > 0:
+                self.zoom()
+            else:
+                self.zoomOut()
 
     def mousePressEvent(self, event):
         if self.brushToggle == True:
@@ -224,6 +228,7 @@ class imageProcesser(QtGui.QWidget,QtGui.QWheelEvent):
 
     def binarize(self):
         self.imgList.append((self.image.copy(),self.img.copy(),0)) #add the instance for the undo function
+        self.toBeSaved = self.image 
         fileNameSave = QtGui.QFileDialog.getSaveFileName(self, "Salvar Imagem","/home/untitled.png",("Images (*.png)"))
         self.image.save(fileNameSave)
         self.img.save('temp.png','PNG')
@@ -279,25 +284,27 @@ class imageProcesser(QtGui.QWidget,QtGui.QWheelEvent):
             self.update()
 
     def zoom(self):
-        w = int(self.image.width() * 1.2)
-        h = int(self.image.height() * 1.2)
-        if w < 1000 and h < 1000:
-            self.img = self.img.resize((w,h))
-            self.img.save('temp.png','PNG')
+        w = int(round(self.image.width() * self.zoomFactor))
+        h = int(round(self.image.height() * self.zoomFactor))
+        if w <= 1000 and h <= 1000:
             self.setGeometry(50,0,w,h)
-            self.image.load('temp.png')
+            self.image = self.image.scaled(w,h,QtCore.Qt.KeepAspectRatio)
+            #self.img = self.img.resize((w,h), Image.BICUBIC)
+            #self.img.save('temp.png','PNG')
+            #self.image.load('temp.png')
             self.update()
 
     def zoomOut(self):
-        w = float(self.image.width()) / 1.2
+        w = float(self.image.width()) / self.zoomFactor
         w = int(round(w))
-        h = float(self.image.height()) / 1.2
+        h = float(self.image.height()) / self.zoomFactor
         h = int(round(h))
-        if w > self.originalSize[0] and h > self.originalSize[1]:
-            self.img = self.img.resize((w,h))
-            self.img.save('temp.png','PNG')
+        if w >= self.originalSize[0] and h >= self.originalSize[1]:
             self.setGeometry(50,0,w,h)
-            self.image.load('temp.png')
+            self.image = self.image.scaled(w,h,QtCore.Qt.KeepAspectRatio)
+            #self.img = self.img.resize((w,h), Image.BICUBIC)
+            #self.img.save('temp.png','PNG')
+            #self.image.load('temp.png')
             self.update()
 
     def setOriginalSize(self):
