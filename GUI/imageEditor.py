@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'imageEditor.ui'
 #
-# Created: Tue Sep 15 17:39:48 2015
+# Created: Fri Sep 18 14:39:03 2015
 #      by: PyQt4 UI code generator 4.10.4
 #
 # WARNING! All changes made in this file will be lost!
@@ -28,11 +28,9 @@ class Ui_MainWindow(object):
         MainWindow.setObjectName(_fromUtf8("MainWindow"))
         MainWindow.resize(1000, 1000)
         self.centralwidget = QtGui.QWidget(MainWindow)
-        self.centralwidget.setMaximumSize(QtCore.QSize(1000, 1000))
         self.centralwidget.setObjectName(_fromUtf8("centralwidget"))
         self.toolBar = QtGui.QGroupBox(self.centralwidget)
         self.toolBar.setGeometry(QtCore.QRect(0, 0, 50, 1000))
-        self.toolBar.setMaximumSize(QtCore.QSize(50, 1000))
         self.toolBar.setTitle(_fromUtf8(""))
         self.toolBar.setObjectName(_fromUtf8("toolBar"))
         self.Brush = QtGui.QPushButton(self.toolBar)

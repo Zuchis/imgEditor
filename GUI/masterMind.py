@@ -136,6 +136,12 @@ class imageProcesser(QtGui.QWidget,QtGui.QWheelEvent):
     def paintEvent(self, event):
         painter = QtGui.QPainter(self)
         painter.drawImage(event.rect(), self.image)
+        imageLabel = QtGui.QLabel(self)
+        imageLabel.setPixmap(QtGui.QPixmap.fromImage(self.image))
+        scroll = QtGui.QScrollArea()
+        scroll.setBackgroundRole(QtGui.QPalette.Dark)
+        scroll.setWidget(imageLabel)
+        scroll.setWidgetResizable(True)
 
     def drawBetween(self):
         if len(self.linePoints) > 1:
@@ -286,13 +292,12 @@ class imageProcesser(QtGui.QWidget,QtGui.QWheelEvent):
     def zoom(self):
         w = int(round(self.image.width() * self.zoomFactor))
         h = int(round(self.image.height() * self.zoomFactor))
-        if w <= 1000 and h <= 1000:
-            self.setGeometry(50,0,w,h)
-            self.image = self.image.scaled(w,h,QtCore.Qt.KeepAspectRatio)
-            #self.img = self.img.resize((w,h), Image.BICUBIC)
-            #self.img.save('temp.png','PNG')
-            #self.image.load('temp.png')
-            self.update()
+        self.setGeometry(50,0,w,h)
+        self.image = self.image.scaled(w,h,QtCore.Qt.KeepAspectRatio)
+        #self.img = self.img.resize((w,h), Image.BICUBIC)
+        #self.img.save('temp.png','PNG')
+        #self.image.load('temp.png')
+        self.update()
 
     def zoomOut(self):
         w = float(self.image.width()) / self.zoomFactor
