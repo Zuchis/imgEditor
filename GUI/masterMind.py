@@ -12,7 +12,21 @@ class imageProcesser(QtGui.QWidget,QtGui.QWheelEvent):
     def __init__(self,parent = None):
         super(imageProcesser, self).__init__(parent)
         self.setAttribute(QtCore.Qt.WA_StaticContents)
-        self.setGeometry(50,0,950,1000)
+        self.setGeometry(50,0,2000,2000)
+
+# =======================SCROLL=====================================
+
+        self.imageLabel = QtGui.QLabel()
+        self.imageLabel.setBackgroundRole(QtGui.QPalette.Base)
+        self.imageLabel.setSizePolicy(QtGui.QSizePolicy.Ignored,
+                QtGui.QSizePolicy.Ignored)
+        self.imageLabel.setScaledContents(True)
+        self.scrollArea = QtGui.QScrollArea()
+        self.scrollArea.setBackgroundRole(QtGui.QPalette.Dark)
+        self.scrollArea.setWidget(self.imageLabel)
+#===================================================================
+
+#==========================ATRIBUTES================================
         self.modified = False
         self.scribbling = False
         self.myPenWidth = 3
@@ -39,6 +53,7 @@ class imageProcesser(QtGui.QWidget,QtGui.QWheelEvent):
         self.imgList = []
         self.originalSize = None
         self.zoomFactor = 1.15
+#=====================================================================
 
 
     def openImage(self, fileName):
@@ -51,6 +66,7 @@ class imageProcesser(QtGui.QWidget,QtGui.QWheelEvent):
         self.image = loadedImage
         self.fileName_ = fileName
         self.img = Image.open(self.fileName_)
+        self.imageLabel.setPixmap(QtGui.QPixmap.fromImage(self.image))
         
         self.modified = False
         self.update()
@@ -135,13 +151,12 @@ class imageProcesser(QtGui.QWidget,QtGui.QWheelEvent):
 
     def paintEvent(self, event):
         painter = QtGui.QPainter(self)
-        painter.drawImage(event.rect(), self.image)
-        imageLabel = QtGui.QLabel(self)
-        imageLabel.setPixmap(QtGui.QPixmap.fromImage(self.image))
-        scroll = QtGui.QScrollArea()
-        scroll.setBackgroundRole(QtGui.QPalette.Dark)
-        scroll.setWidget(imageLabel)
-        scroll.setWidgetResizable(True)
+        #rect = painter.viewport()
+        #size = self.imageLabel.pixmap().size()
+        #size.scale(rect.size(), QtCore.Qt.KeepAspectRatio)
+        #painter.setViewport(rect.x(), rect.y(), size.width(), size.height())
+        #painter.setWindow(self.imageLabel.pixmap().rect())
+        painter.drawPixmap(0, 0, self.imageLabel.pixmap())
 
     def drawBetween(self):
         if len(self.linePoints) > 1:
@@ -292,7 +307,7 @@ class imageProcesser(QtGui.QWidget,QtGui.QWheelEvent):
     def zoom(self):
         w = int(round(self.image.width() * self.zoomFactor))
         h = int(round(self.image.height() * self.zoomFactor))
-        self.setGeometry(50,0,w,h)
+        #self.setGeometry(50,0,w,h)
         self.image = self.image.scaled(w,h,QtCore.Qt.KeepAspectRatio)
         #self.img = self.img.resize((w,h), Image.BICUBIC)
         #self.img.save('temp.png','PNG')
@@ -305,7 +320,7 @@ class imageProcesser(QtGui.QWidget,QtGui.QWheelEvent):
         h = float(self.image.height()) / self.zoomFactor
         h = int(round(h))
         if w >= self.originalSize[0] and h >= self.originalSize[1]:
-            self.setGeometry(50,0,w,h)
+            #self.setGeometry(50,0,w,h)
             self.image = self.image.scaled(w,h,QtCore.Qt.KeepAspectRatio)
             #self.img = self.img.resize((w,h), Image.BICUBIC)
             #self.img.save('temp.png','PNG')
@@ -316,7 +331,7 @@ class imageProcesser(QtGui.QWidget,QtGui.QWheelEvent):
         w,h = self.originalSize
         self.img = self.img.resize((w,h))
         self.img.save('temp.png','PNG')
-        self.setGeometry(50,0,w,h)
+        #self.setGeometry(50,0,w,h)
         self.image.load('temp.png')
         self.update()
 
@@ -326,6 +341,7 @@ class gui(QtGui.QMainWindow, Ui_MainWindow,QtGui.QDialog):
 
         self.setupUi(self)
         self.scribbler = imageProcesser(self.centralwidget)
+        #self.setCentralWidget(self.scrollArea)
 
         QtCore.QObject.connect(self.actionAbrir, QtCore.SIGNAL(("activated()")), self.openFile)
         QtCore.QObject.connect(self.actionDeletar, QtCore.SIGNAL(("activated()")), self.scribbler.clearImage)
@@ -347,7 +363,7 @@ class gui(QtGui.QMainWindow, Ui_MainWindow,QtGui.QDialog):
         fileName = QtGui.QFileDialog.getOpenFileName(self, "Abrir Imagem")
         if fileName:
             self.scribbler.openImage(fileName)
-            self.scribbler.setGeometry(50,0,self.scribbler.image.width(),self.scribbler.image.height())
+            #self.scribbler.setGeometry(50,0,self.scribbler.image.width(),self.scribbler.image.height())
 
     def save(self):
         if self.scribbler.canSave == True:
