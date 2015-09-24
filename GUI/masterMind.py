@@ -14,17 +14,6 @@ class imageProcesser(QtGui.QWidget,QtGui.QWheelEvent):
         self.setAttribute(QtCore.Qt.WA_StaticContents)
         self.setGeometry(50,0,2000,2000)
 
-# =======================SCROLL=====================================
-
-        self.imageLabel = QtGui.QLabel()
-        self.imageLabel.setBackgroundRole(QtGui.QPalette.Base)
-        self.imageLabel.setSizePolicy(QtGui.QSizePolicy.Ignored,
-                QtGui.QSizePolicy.Ignored)
-        self.imageLabel.setScaledContents(True)
-        self.scrollArea = QtGui.QScrollArea()
-        self.scrollArea.setBackgroundRole(QtGui.QPalette.Dark)
-        self.scrollArea.setWidget(self.imageLabel)
-#===================================================================
 
 #==========================ATRIBUTES================================
         self.modified = False
@@ -54,6 +43,25 @@ class imageProcesser(QtGui.QWidget,QtGui.QWheelEvent):
         self.originalSize = None
         self.zoomFactor = 1.15
 #=====================================================================
+
+# =======================SCROLL=======================================
+
+        self.imageLabel = QtGui.QLabel(self)
+        self.imageLabel.setBackgroundRole(QtGui.QPalette.Base)
+        self.imageLabel.setSizePolicy(QtGui.QSizePolicy.Ignored,
+                QtGui.QSizePolicy.Ignored)
+        self.imageLabel.setScaledContents(True)
+
+        self.scrollArea = QtGui.QScrollArea()
+        self.scrollArea.setBackgroundRole(QtGui.QPalette.Dark)
+        self.scrollArea.setWidget(self.imageLabel)
+        self.scrollArea.setWidgetResizable(True)
+        self.scrollArea.setVerticalScrollBarPolicy(QtCore.Qt.ScrollBarAlwaysOn)
+        #vLayout = QtGui.QVBoxLayout(self)
+        #vLayout.addWidget(self.scrollArea)
+        #self.setLayout(vLayout)
+
+#===================================================================
 
 
     def openImage(self, fileName):
@@ -150,13 +158,10 @@ class imageProcesser(QtGui.QWidget,QtGui.QWheelEvent):
             self.scribbling = False
 
     def paintEvent(self, event):
-        painter = QtGui.QPainter(self)
-        #rect = painter.viewport()
-        #size = self.imageLabel.pixmap().size()
-        #size.scale(rect.size(), QtCore.Qt.KeepAspectRatio)
-        #painter.setViewport(rect.x(), rect.y(), size.width(), size.height())
-        #painter.setWindow(self.imageLabel.pixmap().rect())
-        painter.drawPixmap(0, 0, self.imageLabel.pixmap())
+        if self.fileName_:
+            painter = QtGui.QPainter(self)
+            #self.imageLabel.setPixmap(QtGui.QPixmap.fromImage(self.image))
+            #painter.drawImage(self.image.rect(),self.image)
 
     def drawBetween(self):
         if len(self.linePoints) > 1:
@@ -309,6 +314,7 @@ class imageProcesser(QtGui.QWidget,QtGui.QWheelEvent):
         h = int(round(self.image.height() * self.zoomFactor))
         #self.setGeometry(50,0,w,h)
         self.image = self.image.scaled(w,h,QtCore.Qt.KeepAspectRatio)
+        self.imageLabel.setPixmap(QtGui.QPixmap.fromImage(self.image))
         #self.img = self.img.resize((w,h), Image.BICUBIC)
         #self.img.save('temp.png','PNG')
         #self.image.load('temp.png')
@@ -341,7 +347,6 @@ class gui(QtGui.QMainWindow, Ui_MainWindow,QtGui.QDialog):
 
         self.setupUi(self)
         self.scribbler = imageProcesser(self.centralwidget)
-        #self.setCentralWidget(self.scrollArea)
 
         QtCore.QObject.connect(self.actionAbrir, QtCore.SIGNAL(("activated()")), self.openFile)
         QtCore.QObject.connect(self.actionDeletar, QtCore.SIGNAL(("activated()")), self.scribbler.clearImage)
