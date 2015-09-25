@@ -21,6 +21,7 @@ class imageProcesser(QtGui.QWidget,QtGui.QWheelEvent):
         self.myPenWidth = 3
         self.myPenColor = QtCore.Qt.red
         self.image = QtGui.QImage()
+        self.toBeSaved = QtGui.QImage()
         self.binImage = QtGui.QImage()
         self.lastPoint = QtCore.QPoint()
         self.recp1 = QtCore.QPoint(-1,-1)
@@ -44,26 +45,6 @@ class imageProcesser(QtGui.QWidget,QtGui.QWheelEvent):
         self.zoomFactor = 1.15
 #=====================================================================
 
-# =======================SCROLL=======================================
-
-        self.imageLabel = QtGui.QLabel(self)
-        self.imageLabel.setBackgroundRole(QtGui.QPalette.Base)
-        self.imageLabel.setSizePolicy(QtGui.QSizePolicy.Ignored,
-                QtGui.QSizePolicy.Ignored)
-        self.imageLabel.setScaledContents(True)
-
-        self.scrollArea = QtGui.QScrollArea()
-        self.scrollArea.setBackgroundRole(QtGui.QPalette.Dark)
-        self.scrollArea.setWidget(self.imageLabel)
-        self.scrollArea.setWidgetResizable(True)
-        self.scrollArea.setVerticalScrollBarPolicy(QtCore.Qt.ScrollBarAlwaysOn)
-        #vLayout = QtGui.QVBoxLayout(self)
-        #vLayout.addWidget(self.scrollArea)
-        #self.setLayout(vLayout)
-
-#===================================================================
-
-
     def openImage(self, fileName):
         loadedImage = QtGui.QImage()
         if not loadedImage.load(fileName):
@@ -74,7 +55,7 @@ class imageProcesser(QtGui.QWidget,QtGui.QWheelEvent):
         self.image = loadedImage
         self.fileName_ = fileName
         self.img = Image.open(self.fileName_)
-        self.imageLabel.setPixmap(QtGui.QPixmap.fromImage(self.image))
+        #self.imageLabel.setPixmap(QtGui.QPixmap.fromImage(self.image))
         
         self.modified = False
         self.update()
@@ -111,6 +92,7 @@ class imageProcesser(QtGui.QWidget,QtGui.QWheelEvent):
     def mousePressEvent(self, event):
         if self.brushToggle == True:
             if event.button() == QtCore.Qt.LeftButton:
+                self.imgList.append((self.image.copy(),self.img.copy(),2)) #add the instance for the undo function
                 self.lastPoint = event.pos()
                 x = self.lastPoint.x()
                 y = self.lastPoint.y()
@@ -160,8 +142,7 @@ class imageProcesser(QtGui.QWidget,QtGui.QWheelEvent):
     def paintEvent(self, event):
         if self.fileName_:
             painter = QtGui.QPainter(self)
-            #self.imageLabel.setPixmap(QtGui.QPixmap.fromImage(self.image))
-            #painter.drawImage(self.image.rect(),self.image)
+            painter.drawImage(self.image.rect(),self.image)
 
     def drawBetween(self):
         if len(self.linePoints) > 1:
@@ -254,11 +235,7 @@ class imageProcesser(QtGui.QWidget,QtGui.QWheelEvent):
 
     def binarize(self):
         self.imgList.append((self.image.copy(),self.img.copy(),0)) #add the instance for the undo function
-        self.toBeSaved = self.image 
-        fileNameSave = QtGui.QFileDialog.getSaveFileName(self, "Salvar Imagem","/home/untitled.png",("Images (*.png)"))
-        self.image.save(fileNameSave)
-        self.img.save('temp.png','PNG')
-        self.fileName_ = fileNameSave
+        self.toBeSaved = self.image.copy()
         self.canSave = True
         draw = ImageDraw.Draw(self.img)
         (w,h) = self.img.size
@@ -312,12 +289,10 @@ class imageProcesser(QtGui.QWidget,QtGui.QWheelEvent):
     def zoom(self):
         w = int(round(self.image.width() * self.zoomFactor))
         h = int(round(self.image.height() * self.zoomFactor))
-        #self.setGeometry(50,0,w,h)
-        self.image = self.image.scaled(w,h,QtCore.Qt.KeepAspectRatio)
-        self.imageLabel.setPixmap(QtGui.QPixmap.fromImage(self.image))
-        #self.img = self.img.resize((w,h), Image.BICUBIC)
-        #self.img.save('temp.png','PNG')
-        #self.image.load('temp.png')
+        #self.imageLabel.setPixmap(QtGui.QPixmap.fromImage(self.image))
+        self.img = self.img.resize((w,h), Image.BICUBIC)
+        self.img.save('temp.png','PNG')
+        self.image.load('temp.png')
         self.update()
 
     def zoomOut(self):
@@ -327,10 +302,10 @@ class imageProcesser(QtGui.QWidget,QtGui.QWheelEvent):
         h = int(round(h))
         if w >= self.originalSize[0] and h >= self.originalSize[1]:
             #self.setGeometry(50,0,w,h)
-            self.image = self.image.scaled(w,h,QtCore.Qt.KeepAspectRatio)
-            #self.img = self.img.resize((w,h), Image.BICUBIC)
-            #self.img.save('temp.png','PNG')
-            #self.image.load('temp.png')
+            #self.image = self.image.scaled(w,h,QtCore.Qt.KeepAspectRatio)
+            self.img = self.img.resize((w,h), Image.BICUBIC)
+            self.img.save('temp.png','PNG')
+            self.image.load('temp.png')
             self.update()
 
     def setOriginalSize(self):
@@ -347,6 +322,20 @@ class gui(QtGui.QMainWindow, Ui_MainWindow,QtGui.QDialog):
 
         self.setupUi(self)
         self.scribbler = imageProcesser(self.centralwidget)
+
+# =======================SCROLL=======================================
+
+        #self.imageLabel = QtGui.QLabel(self)
+        #self.imageLabel.setBackgroundRole(QtGui.QPalette.Base)
+        #self.imageLabel.setSizePolicy(QtGui.QSizePolicy.Ignored,
+                #QtGui.QSizePolicy.Ignored)
+        #self.imageLabel.setScaledContents(True)
+
+        #self.scrollArea = QtGui.QScrollArea(self.centralwidget)
+        #self.scrollArea.setBackgroundRole(QtGui.QPalette.Dark)
+        #self.scrollArea.setWidgetResizable(True)
+
+#===================================================================
 
         QtCore.QObject.connect(self.actionAbrir, QtCore.SIGNAL(("activated()")), self.openFile)
         QtCore.QObject.connect(self.actionDeletar, QtCore.SIGNAL(("activated()")), self.scribbler.clearImage)
@@ -372,6 +361,10 @@ class gui(QtGui.QMainWindow, Ui_MainWindow,QtGui.QDialog):
 
     def save(self):
         if self.scribbler.canSave == True:
+            fileNameSave = QtGui.QFileDialog.getSaveFileName(self, "Salvar Imagem","/home/untitled.png",("Images (*.png)"))
+            self.scribbler.toBeSaved.save(fileNameSave)
+            self.scribbler.img.save('temp.png','PNG')
+            self.scribbler.fileName_ = fileNameSave
             self.outputManipulation()
 
     def outputManipulation(self):
