@@ -287,15 +287,18 @@ class imageProcesser(QtGui.QWidget,QtGui.QWheelEvent):
             self.update()
 
     def zoom(self):
+        self.imgList.append((self.image.copy(),self.img.copy(),0)) #add the instance for the undo function
         w = int(round(self.image.width() * self.zoomFactor))
         h = int(round(self.image.height() * self.zoomFactor))
         #self.imageLabel.setPixmap(QtGui.QPixmap.fromImage(self.image))
         self.img = self.img.resize((w,h), Image.BICUBIC)
         self.img.save('temp.png','PNG')
         self.image.load('temp.png')
+        del self.linePoints[:]
         self.update()
 
     def zoomOut(self):
+        self.imgList.append((self.image.copy(),self.img.copy(),0)) #add the instance for the undo function
         w = float(self.image.width()) / self.zoomFactor
         w = int(round(w))
         h = float(self.image.height()) / self.zoomFactor
@@ -306,9 +309,11 @@ class imageProcesser(QtGui.QWidget,QtGui.QWheelEvent):
             self.img = self.img.resize((w,h), Image.BICUBIC)
             self.img.save('temp.png','PNG')
             self.image.load('temp.png')
+            del self.linePoints[:]
             self.update()
 
     def setOriginalSize(self):
+        self.imgList.append((self.image.copy(),self.img.copy(),0)) #add the instance for the undo function
         w,h = self.originalSize
         self.img = self.img.resize((w,h))
         self.img.save('temp.png','PNG')
