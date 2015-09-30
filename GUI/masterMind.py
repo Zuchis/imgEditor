@@ -42,6 +42,7 @@ class imageProcesser(QtGui.QWidget,QtGui.QWheelEvent):
         self.linePoints = []
         self.imgList = []
         self.originalSize = None
+        self.lastSize = None
         self.zoomFactor = 1.15
 #=====================================================================
 
@@ -55,11 +56,10 @@ class imageProcesser(QtGui.QWidget,QtGui.QWheelEvent):
         self.image = loadedImage
         self.fileName_ = fileName
         self.img = Image.open(self.fileName_)
-        #self.imageLabel.setPixmap(QtGui.QPixmap.fromImage(self.image))
         
         self.modified = False
         self.update()
-        self.originalSize = self.img.size
+        self.lastSize = self.originalSize = self.img.size
         return True
 
     def saveImage(self,fileName,fileFormat):
@@ -293,6 +293,9 @@ class imageProcesser(QtGui.QWidget,QtGui.QWheelEvent):
         self.img = self.img.resize((w,h), Image.BICUBIC)
         self.img.save('temp.png','PNG')
         self.image.load('temp.png')
+        if self.recp1 != self.pointNull and self.recp2 != self.pointNull:
+            self.setRecp(w,h)
+            self.lastSize = (w,h)
         self.update()
 
     def zoomOut(self):
@@ -306,6 +309,9 @@ class imageProcesser(QtGui.QWidget,QtGui.QWheelEvent):
             self.img = self.img.resize((w,h), Image.BICUBIC)
             self.img.save('temp.png','PNG')
             self.image.load('temp.png')
+            if self.recp1 != self.pointNull and self.recp2 != self.pointNull:
+                self.setRecp(w,h)
+                self.lastSize = (w,h)
             self.update()
 
     def setOriginalSize(self):
@@ -314,7 +320,18 @@ class imageProcesser(QtGui.QWidget,QtGui.QWheelEvent):
         self.img.save('temp.png','PNG')
         #self.setGeometry(50,0,w,h)
         self.image.load('temp.png')
+        if self.recp1 != self.pointNull and self.recp2 != self.pointNull:
+            self.setRecp(w,h)
+            self.lastSize = (w,h)
         self.update()
+
+    def setRecp(self,w,h):
+        self.recp1.setX(int(round((self.recp1.x()*w)/self.lastSize[0])))
+        self.recp1.setY(int(round((self.recp1.y()*h)/self.lastSize[1])))
+        self.recp2.setX(int(round((self.recp2.x()*w)/self.lastSize[0])))
+        self.recp2.setY(int(round((self.recp2.y()*h)/self.lastSize[1])))
+
+        
 
 class gui(QtGui.QMainWindow, Ui_MainWindow,QtGui.QDialog):
     def __init__(self, parent=None):
@@ -322,18 +339,23 @@ class gui(QtGui.QMainWindow, Ui_MainWindow,QtGui.QDialog):
 
         self.setupUi(self)
         self.scribbler = imageProcesser(self.centralwidget)
-
 # =======================SCROLL=======================================
 
-        #self.imageLabel = QtGui.QLabel(self)
-        #self.imageLabel.setBackgroundRole(QtGui.QPalette.Base)
+        #self.scrollArea = QtGui.QScrollArea()
+        #self.scrollArea.setBackgroundRole(QtGui.QPalette.Dark)
+        #self.scrollArea.setGeometry(self.scribbler.rect())
+        #self.scrollArea.setWidget(self.scribbler)
+        #self.scrollArea.setWidgetResizable(True)
+        #self.scrollArea.setFixedHeight(400)
+        #self.scrollArea.setFixedWidth(400)
+        #self.scrollArea.setStyleSheet("QScrollArea {background-color:transparent;}")
+        #self.scribbler.setStyleSheet("background-color:transparent;")
+
+        #self.imageLabel = QtGui.QLabel(self.scrollArea)
+        #self.imageLabel.setGeometry(self.scribbler.rect())
         #self.imageLabel.setSizePolicy(QtGui.QSizePolicy.Ignored,
                 #QtGui.QSizePolicy.Ignored)
         #self.imageLabel.setScaledContents(True)
-
-        #self.scrollArea = QtGui.QScrollArea(self.centralwidget)
-        #self.scrollArea.setBackgroundRole(QtGui.QPalette.Dark)
-        #self.scrollArea.setWidgetResizable(True)
 
 #===================================================================
 
