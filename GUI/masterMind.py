@@ -66,13 +66,9 @@ class imageProcesser(QtGui.QWidget,QtGui.QWheelEvent):
         #self.image.load(name)
         self.img = Image.open(name)
         self.swapBuffers(self.img)
-        w,h = self.img.size
-        #self.rectangleBuffer.fill(QtGui.qRgba(0,0,0,0))
-
-        
         self.modified = False
-        self.update()
         self.lastSize = self.originalSize = self.img.size
+        self.update()
         return True
 
     def saveImage(self,fileName,fileFormat):
@@ -105,7 +101,7 @@ class imageProcesser(QtGui.QWidget,QtGui.QWheelEvent):
     def mousePressEvent(self, event):
         if self.brushToggle == True:
             if event.button() == QtCore.Qt.LeftButton:
-                self.imgList.append((self.image.copy(),self.img.copy(),2)) #add the instance for the undo function
+                self.imgList.append((self.img.copy(),2)) #add the instance for the undo function
                 self.lastPoint = event.pos()
                 x = self.lastPoint.x()
                 y = self.lastPoint.y()
@@ -115,9 +111,6 @@ class imageProcesser(QtGui.QWidget,QtGui.QWheelEvent):
             if event.button() == QtCore.Qt.LeftButton:
                 if self.recp1 == self.pointNull:
                    self.recp1 = event.pos()
-                #elif self.recp2 == self.pointNull:
-                   #self.recp2 = event.pos()
-                   #self.drawRec()
         elif self.lineToggle == True:
             if event.button() == QtCore.Qt.LeftButton:
                 point = event.pos()
@@ -141,11 +134,11 @@ class imageProcesser(QtGui.QWidget,QtGui.QWheelEvent):
             #self.drawnPixels.add((x,y))
             if self.brushToggle == True:
                 self.drawLineTo(point)
-        elif (event.buttons() & QtCore.Qt.LeftButton) and self.recToggle == True:
+        elif (event.buttons() & QtCore.Qt.LeftButton) and self.recToggle == True and self.canDrawRec == True:
             point = event.pos()
             self.recp2 = point
             #self.rectangleBuffer.fill(QtGui.qRgba(0,0,0,0))
-            self.drawRec()
+            self.showRec()
 
     def mouseReleaseEvent(self, event):
         if event.button() == QtCore.Qt.LeftButton and self.scribbling:
@@ -155,6 +148,10 @@ class imageProcesser(QtGui.QWidget,QtGui.QWheelEvent):
             #self.drawnPixels.add((x,y))
             self.drawLineTo(point)
             self.scribbling = False
+        elif event.button() == QtCore.Qt.LeftButton and self.recToggle == True:
+            point = event.pos()
+            self.recp2 = point
+            self.drawRec()
 
     def paintEvent(self, event):
         if self.fileName_:
@@ -163,24 +160,17 @@ class imageProcesser(QtGui.QWidget,QtGui.QWheelEvent):
 
     def drawBetween(self):
         if len(self.linePoints) > 1:
-            self.imgList.append((self.image.copy(),self.img.copy(),2)) #add the instance for the undo function
-            painter = QtGui.QPainter(self.image)
-            painter.setPen(QtGui.QPen(QtCore.Qt.red, self.myPenWidth,
-                    QtCore.Qt.SolidLine, QtCore.Qt.RoundCap, QtCore.Qt.RoundJoin))
-            start = self.linePoints[len(self.linePoints)-2]
-            x1,y1 = start
-            start = QtCore.QPoint(start[0],start[1])
-            end = self.linePoints[len(self.linePoints)-1]
-            x2,y2 = end
-            end = QtCore.QPoint(end[0],end[1])
-            painter.drawLine(start,end)
+            self.imgList.append((self.img.copy(),2)) #add the instance for the undo function
+            x1,y1 = self.linePoints[len(self.linePoints)-2]
+            x2,y2 = self.linePoints[len(self.linePoints)-1]
             draw = ImageDraw.Draw(self.img)
-            draw.line(((x1,y1),(x2,y2)),(255,0,0))
+            draw.line(((x1,y1),(x2,y2)),(255,0,0),2)
             self.modified = True
+            self.swapBuffers(self.img)
             self.update()
 
     def floodFill(self,pixel):
-        self.imgList.append((self.image.copy(),self.img.copy(),0)) #add the instance for the undo function
+        self.imgList.append((self.img.copy(),0)) #add the instance for the undo function
         pStack = [pixel]
         processedPixels = set()
         while len(pStack) > 0:
@@ -197,8 +187,7 @@ class imageProcesser(QtGui.QWidget,QtGui.QWheelEvent):
                     pStack.append((x, y + 1))
                     pStack.append((x, y - 1))
         self.modified = True
-        self.img.save('temp.png','PNG')
-        self.image.load('temp.png')
+        self.swapBuffers(self.img)
         self.update()
 
             
@@ -216,12 +205,6 @@ class imageProcesser(QtGui.QWidget,QtGui.QWheelEvent):
     def drawLineTo(self, endPoint):
         if self.fileName_:
             if self.brushToggle == True:
-                painter = QtGui.QPainter(self.image)
-                painter.setPen(QtGui.QPen(self.myPenColor, self.myPenWidth,
-                        QtCore.Qt.SolidLine, QtCore.Qt.RoundCap, QtCore.Qt.RoundJoin))
-                painter.drawLine(self.lastPoint, endPoint)
-                self.modified = True
-                self.update()
                 x1 = self.lastPoint.x()
                 y1 = self.lastPoint.y()
                 x2 = endPoint.x()
@@ -229,33 +212,31 @@ class imageProcesser(QtGui.QWidget,QtGui.QWheelEvent):
                 self.drawnPixels.add((x2,y2))
                 self.lastPoint = QtCore.QPoint(endPoint)
                 draw = ImageDraw.Draw(self.img)
-                draw.line(((x1,y1),(x2,y2)),(255,0,0))
-
-    #def drawRec(self):
-        #if self.recToggle == True and self.canDrawRec == True:
-            #self.imgList.append((self.image.copy(),self.img.copy(),1)) #add the instance for the undo function
-            #x = self.recp1.x()
-            #y = self.recp1.y()
-            #w = self.recp2.x() - self.recp1.x()
-            #h = self.recp2.y() - self.recp1.y()
-            #x2 = self.recp2.x()
-            #y2 = self.recp2.y()
-            #painter = QtGui.QPainter(self.image)
-            #painter.setPen(QtGui.QPen(QtCore.Qt.red, self.myPenWidth,
-                    #QtCore.Qt.SolidLine, QtCore.Qt.RoundCap, QtCore.Qt.RoundJoin))
-            #painter.drawRect(x,y,w,h)
-            #draw = ImageDraw.Draw(self.img)
-            #draw.rectangle(((x,y),(x2,y2)),None,(255,0,0))
-            #self.modified = True
-            #self.canDrawRec = False
-            #self.update()
+                draw.line(((x1,y1),(x2,y2)),(255,0,0),2)
+                self.modified = True
+                self.swapBuffers(self.img)
+                self.update()
 
     def drawRec(self):
-        #if self.recToggle == True and self.canDrawRec == True:
+        if self.canDrawRec:
+            self.imgList.append((self.img.copy(),1)) #add the instance for the undo function
             x = self.recp1.x()
             y = self.recp1.y()
-            #w = self.recp2.x() - self.recp1.x()
-            #h = self.recp2.y() - self.recp1.y()
+            x2 = self.recp2.x()
+            y2 = self.recp2.y()
+            w,h = self.img.size
+            draw = ImageDraw.Draw(self.img)
+            draw.rectangle(((x,y),(x2,y2)),None,(255,0,0))
+            if x-1 > 0 and y-1 > 0 and x2+1 < w and y2+1 < h:
+                draw.rectangle(((x-1,y-1),(x2+1,y2+1)),None,(255,0,0))
+            self.modified = True
+            self.canDrawRec = False
+            self.swapBuffers(self.img)
+            self.update()
+
+    def showRec(self):
+            x = self.recp1.x()
+            y = self.recp1.y()
             x2 = self.recp2.x()
             y2 = self.recp2.y()
             rectangleBuffer = Image.new('RGBA',self.img.size,(0,0,0,0))
@@ -264,21 +245,12 @@ class imageProcesser(QtGui.QWidget,QtGui.QWheelEvent):
             temp = self.img.copy()
             temp.paste(rectangleBuffer, (0,0), rectangleBuffer)
             self.swapBuffers(temp)
-            #painter = QtGui.QPainter(self.rectangleBuffer)
-            #painter.setPen(QtGui.QPen(QtCore.Qt.red, self.myPenWidth,
-                    #QtCore.Qt.SolidLine, QtCore.Qt.RoundCap, QtCore.Qt.RoundJoin))
-            #painter.drawRect(x,y,w,h)
-            #self.rectangleBuffer.save('ffs.png')
-            #draw = ImageDraw.Draw(self.img)
-            #draw.rectangle(((x,y),(x2,y2)),None,(255,0,0))
-            #self.modified = True
-            #self.canDrawRec = False
             self.update()
 
     def binarize(self):
-        self.imgList.append((self.image.copy(),self.img.copy(),0)) #add the instance for the undo function
-        self.toBeSaved = self.image.copy()
-        self.toBeSaved = self.toBeSaved.scaled(w,h,QtCore.Qt.KeepAspectRatio)
+        self.imgList.append((self.img.copy(),0)) #add the instance for the undo function
+        self.toBeSaved = self.img.copy()
+        self.toBeSaved = self.toBeSaved.resize(self.originalSize,Image.BICUBIC)
         self.canSave = True
         draw = ImageDraw.Draw(self.img)
         (w,h) = self.img.size
@@ -295,15 +267,14 @@ class imageProcesser(QtGui.QWidget,QtGui.QWheelEvent):
                     self.img.putpixel((i,j),(0,0,0))
 
         for i in range (xOrigin+offset,xDestin+offset):
-            for j in range (yOrigin+offset,yDestin+offset):
+            for j in range (yOrigin,yDestin):
                 r,g,b = self.img.getpixel((i,j)) 
                 if r > self.rThresh and g > self.gThresh and b > self.bThresh: #check if it is white
                     self.img.putpixel((i,j),(255,255,255))
                 elif r < self.rThresh: # if it isn't, check if it is a red one
                     self.img.putpixel((i,j),(0,0,0))
 
-        self.img.save('temp.png','PNG')
-        self.image.load('temp.png')
+        self.swapBuffers(self.img)
         self.update()
 
     def isModified(self):
@@ -321,12 +292,15 @@ class imageProcesser(QtGui.QWidget,QtGui.QWheelEvent):
 
     def undo(self):
         if len(self.imgList) > 0:
-            self.image,self.img,ret = self.imgList.pop()
-            if len(self.linePoints) > 0 and ret == 2:
+            self.img,ret = self.imgList.pop()
+            if ret == 2 and len(self.linePoints) > 0:
                 del self.linePoints[-1:]
+                if len(self.imgList) == 0:
+                    del self.linePoints[:]
             elif ret == 1:
                 self.recp1 = self.recp2 = self.pointNull
                 self.canDrawRec = True
+            self.swapBuffers(self.img)
             self.update()
 
     def zoom(self):
@@ -334,8 +308,7 @@ class imageProcesser(QtGui.QWidget,QtGui.QWheelEvent):
         h = int(round(self.image.height() * self.zoomFactor))
         #self.imageLabel.setPixmap(QtGui.QPixmap.fromImage(self.image))
         self.img = self.img.resize((w,h), Image.BICUBIC)
-        self.img.save('temp.png','PNG')
-        self.image.load('temp.png')
+        self.swapBuffers(self.img)
         if self.recp1 != self.pointNull and self.recp2 != self.pointNull:
             self.setRecp(w,h)
             self.lastSize = (w,h)
@@ -350,8 +323,7 @@ class imageProcesser(QtGui.QWidget,QtGui.QWheelEvent):
             #self.setGeometry(50,0,w,h)
             #self.image = self.image.scaled(w,h,QtCore.Qt.KeepAspectRatio)
             self.img = self.img.resize((w,h), Image.BICUBIC)
-            self.img.save('temp.png','PNG')
-            self.image.load('temp.png')
+            self.swapBuffers(self.img)
             if self.recp1 != self.pointNull and self.recp2 != self.pointNull:
                 self.setRecp(w,h)
                 self.lastSize = (w,h)
@@ -361,9 +333,7 @@ class imageProcesser(QtGui.QWidget,QtGui.QWheelEvent):
         w,h = self.originalSize
         if (self.img.size != (w,h)):
             self.img = self.img.resize((w,h), Image.BICUBIC)
-            self.img.save('temp.png','PNG')
-            #self.setGeometry(50,0,w,h)
-            self.image.load('temp.png')
+            self.swapBuffers(self.img)
             if self.recp1 != self.pointNull and self.recp2 != self.pointNull:
                 self.setRecp(w,h)
                 self.lastSize = (w,h)
@@ -417,7 +387,6 @@ class gui(QtGui.QMainWindow, Ui_MainWindow,QtGui.QDialog):
         self.LineLinker.clicked.connect(self.toggleLines)
         self.Bucket.clicked.connect(self.toggleBucket)
         self.BlackRec.clicked.connect(self.scribbler.changeBlack)
-        self.f = None
 
     def openFile(self):
         #fileName = QtGui.QFileDialog.getOpenFileName(self, "Abrir Imagem")
@@ -430,7 +399,6 @@ class gui(QtGui.QMainWindow, Ui_MainWindow,QtGui.QDialog):
         if self.scribbler.canSave == True:
             fileNameSave = QtGui.QFileDialog.getSaveFileName(self, "Salvar Imagem","/home/untitled.png",("Images (*.png)"))
             self.scribbler.toBeSaved.save(fileNameSave)
-            self.scribbler.img.save('temp.png','PNG')
             self.scribbler.fileName_ = fileNameSave
             self.outputManipulation()
 
@@ -438,25 +406,24 @@ class gui(QtGui.QMainWindow, Ui_MainWindow,QtGui.QDialog):
         splits = self.scribbler.fileName_.split('/')
         output = '/'.join(splits[:-1])
         output = output + '/output.txt'
-        self.f = open(output,"w")
+        f = open(output,"w")
+        self.scribbler.setOriginalSize()
         x1 = self.scribbler.recp1.x()
         y1 = self.scribbler.recp1.y()
         x2 = self.scribbler.recp2.x()
         y2 = self.scribbler.recp2.y()
-        self.f.write(self.scribbler.fileName_ + '\n')
-        self.f.write(str(self.scribbler.image.width()) + ' ' +  str(self.scribbler.image.height()) + '\n')
-        self.f.write('(' + str(x1) +','+str(y1) + ')' + '  ' + '(' + str(x2) +','+str(y2) + ')' + '\n')
-        self.scribbler.image.save('temp.png')
-        img = Image.open('temp.png')
-        img = img.resize(self.originalSize, Image.BICUBIC)
+        f.write(self.scribbler.fileName_ + '\n')
+        f.write(str(self.scribbler.image.width()) + ' ' +  str(self.scribbler.image.height()) + '\n')
+        f.write('(' + str(x1) +','+str(y1) + ')' + '  ' + '(' + str(x2) +','+str(y2) + ')' + '\n')
+        img = self.scribbler.img
         for j in range (y1,y2):
             for i in range (x1,x2):
                 r,g,b = img.getpixel((i,j))
                 if (r,g,b) == (255,255,255):
-                    self.f.write('1')
+                    f.write('1')
                 else:
-                    self.f.write('0')
-            self.f.write('\n')
+                    f.write('0')
+            f.write('\n')
 
     def toggleBrush(self):
         if self.scribbler.brushToggle == False:
