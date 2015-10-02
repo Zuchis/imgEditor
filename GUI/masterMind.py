@@ -1,7 +1,7 @@
 import sys
 from PyQt4 import *
 from imageEditor import *
-from PIL import Image, ImageDraw
+from PIL import Image, ImageDraw, ImageQt
 from copy import *
 
 # TODO
@@ -46,8 +46,10 @@ class imageProcesser(QtGui.QWidget,QtGui.QWheelEvent):
         self.zoomFactor = 1.15
 #=====================================================================
 
-        self.imageLabel = QtGui.QLabel(self)
-        self.rectangleBuffer = None 
+
+    def swapBuffers(self,img):
+        pilToQt = ImageQt.ImageQt(img)
+        self.image = pilToQt
 
     def openImage(self, fileName):
         #loadedImage = QtGui.QImage()
@@ -61,14 +63,11 @@ class imageProcesser(QtGui.QWidget,QtGui.QWheelEvent):
         #self.fileName_ = fileName
         #self.img = Image.open(self.fileName_)
         self.fileName_ = name 
-        self.image.load(name)
+        #self.image.load(name)
         self.img = Image.open(name)
+        self.swapBuffers(self.img)
         w,h = self.img.size
-        self.rectangleBuffer = QtGui.QImage(w,h,QtGui.QImage.Format_RGB32)
-        self.rectangleBuffer.fill(QtGui.qRgba(0,0,0,0))
-        #self.rectangleBuffer.fill(QtGui.qRgb(0,0,0))
-        self.rectangleBuffer.save('ffs.png')
-        self.imageLabel.setPixmap(QtGui.QPixmap.fromImage(self.rectangleBuffer))
+        #self.rectangleBuffer.fill(QtGui.qRgba(0,0,0,0))
 
         
         self.modified = False
@@ -142,10 +141,11 @@ class imageProcesser(QtGui.QWidget,QtGui.QWheelEvent):
             #self.drawnPixels.add((x,y))
             if self.brushToggle == True:
                 self.drawLineTo(point)
-            elif self.recToggle == True:
-                self.recp2 = point
-                #self.rectangleBuffer.fill(QtGui.qRgba(0,0,0,0))
-                self.drawRec()
+        elif (event.buttons() & QtCore.Qt.LeftButton) and self.recToggle == True:
+            point = event.pos()
+            self.recp2 = point
+            #self.rectangleBuffer.fill(QtGui.qRgba(0,0,0,0))
+            self.drawRec()
 
     def mouseReleaseEvent(self, event):
         if event.button() == QtCore.Qt.LeftButton and self.scribbling:
@@ -254,18 +254,24 @@ class imageProcesser(QtGui.QWidget,QtGui.QWheelEvent):
         #if self.recToggle == True and self.canDrawRec == True:
             x = self.recp1.x()
             y = self.recp1.y()
-            w = self.recp2.x() - self.recp1.x()
-            h = self.recp2.y() - self.recp1.y()
+            #w = self.recp2.x() - self.recp1.x()
+            #h = self.recp2.y() - self.recp1.y()
             x2 = self.recp2.x()
             y2 = self.recp2.y()
-            painter = QtGui.QPainter(self.rectangleBuffer)
-            painter.setPen(QtGui.QPen(QtCore.Qt.red, self.myPenWidth,
-                    QtCore.Qt.SolidLine, QtCore.Qt.RoundCap, QtCore.Qt.RoundJoin))
-            painter.drawRect(x,y,w,h)
+            rectangleBuffer = Image.new('RGBA',self.img.size,(0,0,0,0))
+            draw = ImageDraw.Draw(rectangleBuffer)
+            draw.rectangle(((x,y),(x2,y2)),None,(255,0,0))
+            temp = self.img.copy()
+            temp.paste(rectangleBuffer, (0,0), rectangleBuffer)
+            self.swapBuffers(temp)
+            #painter = QtGui.QPainter(self.rectangleBuffer)
+            #painter.setPen(QtGui.QPen(QtCore.Qt.red, self.myPenWidth,
+                    #QtCore.Qt.SolidLine, QtCore.Qt.RoundCap, QtCore.Qt.RoundJoin))
+            #painter.drawRect(x,y,w,h)
             #self.rectangleBuffer.save('ffs.png')
             #draw = ImageDraw.Draw(self.img)
             #draw.rectangle(((x,y),(x2,y2)),None,(255,0,0))
-            self.modified = True
+            #self.modified = True
             #self.canDrawRec = False
             self.update()
 
