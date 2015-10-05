@@ -6,7 +6,6 @@ from copy import *
 
 # TODO
 # Adicionar dialogos para: modificação de arquivos; avisar que a imagem não foi binarizada
-# Adicionar ferramenta de zoom
 
 class imageProcesser(QtGui.QWidget,QtGui.QWheelEvent):
     def __init__(self,parent = None):
@@ -27,10 +26,9 @@ class imageProcesser(QtGui.QWidget,QtGui.QWheelEvent):
         self.recp1 = QtCore.QPoint(-1,-1)
         self.recp2 = QtCore.QPoint(-1,-1)
         self.pointNull = QtCore.QPoint(-1,-1)
-        self.brushToggle = False
-        self.recToggle = False
-        self.lineToggle = False
-        self.bucketToggle = False
+        toolsList = ['brush','rec','line','bucket','eraser'] 
+        self.index = dict(zip(toolsList, [x for x in range(len(toolsList))]))
+        self.toolsToggle = [False,False,False,False,False]
         self.canDrawRec = True
         self.canSave = False
         self.fileName_ = None
@@ -99,7 +97,7 @@ class imageProcesser(QtGui.QWidget,QtGui.QWheelEvent):
                 self.zoomOut()
 
     def mousePressEvent(self, event):
-        if self.brushToggle == True:
+        if self.toolsToggle[self.index['brush']] == True:
             if event.button() == QtCore.Qt.LeftButton:
                 self.imgList.append((self.img.copy(),2)) #add the instance for the undo function
                 self.lastPoint = event.pos()
@@ -107,18 +105,18 @@ class imageProcesser(QtGui.QWidget,QtGui.QWheelEvent):
                 y = self.lastPoint.y()
                 self.drawnPixels.add((x,y))
                 self.scribbling = True
-        elif self.recToggle == True:
+        elif self.toolsToggle[self.index['rec']] == True:
             if event.button() == QtCore.Qt.LeftButton:
                 if self.recp1 == self.pointNull:
                    self.recp1 = event.pos()
-        elif self.lineToggle == True:
+        elif self.toolsToggle[self.index['line']] == True:
             if event.button() == QtCore.Qt.LeftButton:
                 point = event.pos()
                 x = point.x()
                 y = point.y()
                 self.linePoints.append((x,y))
                 self.drawBetween()
-        elif self.bucketToggle == True:
+        elif self.toolsToggle[self.index['bucket']] == True:
             if event.button() == QtCore.Qt.LeftButton:
                 point = event.pos()
                 x = point.x()
@@ -132,9 +130,9 @@ class imageProcesser(QtGui.QWidget,QtGui.QWheelEvent):
             #x = point.x()
             #y = point.y()
             #self.drawnPixels.add((x,y))
-            if self.brushToggle == True:
+            if self.toolsToggle[self.index['brush']] == True:
                 self.drawLineTo(point)
-        elif (event.buttons() & QtCore.Qt.LeftButton) and self.recToggle == True and self.canDrawRec == True:
+        elif (event.buttons() & QtCore.Qt.LeftButton) and self.toolsToggle[self.index['rec']] == True and self.canDrawRec == True:
             point = event.pos()
             self.recp2 = point
             #self.rectangleBuffer.fill(QtGui.qRgba(0,0,0,0))
@@ -148,7 +146,7 @@ class imageProcesser(QtGui.QWidget,QtGui.QWheelEvent):
             #self.drawnPixels.add((x,y))
             self.drawLineTo(point)
             self.scribbling = False
-        elif event.button() == QtCore.Qt.LeftButton and self.recToggle == True:
+        elif event.button() == QtCore.Qt.LeftButton and self.toolsToggle[self.index['rec']] == True:
             point = event.pos()
             self.recp2 = point
             self.drawRec()
@@ -204,7 +202,7 @@ class imageProcesser(QtGui.QWidget,QtGui.QWheelEvent):
 
     def drawLineTo(self, endPoint):
         if self.fileName_:
-            if self.brushToggle == True:
+            if self.toolsToggle[self.index['brush']] == True:
                 x1 = self.lastPoint.x()
                 y1 = self.lastPoint.y()
                 x2 = endPoint.x()
@@ -433,49 +431,71 @@ class gui(QtGui.QMainWindow, Ui_MainWindow,QtGui.QDialog):
             f.write('\n')
 
     def toggleBrush(self):
-        if self.scribbler.brushToggle == False:
-            self.Brush.setDefault(True)
-            self.scribbler.brushToggle = True
-            self.scribbler.recToggle = False
-            self.scribbler.lineToggle = False
+        ind = self.scribbler.index
+        if self.scribbler.toolsToggle[ind['brush']] == False:
+            self.Brush.setDown(True)
             del self.scribbler.linePoints[:]
-            self.scribbler.bucketToggle = False
+
+            for i in range (0,len(self.scribbler.toolsToggle)):
+                self.scribbler.toolsToggle[i] = False
+
+            self.scribbler.toolsToggle[ind['brush']] = True
         else:
-            self.Brush.setDefault(False)
-            self.scribbler.brushToggle = False
+            self.Brush.setDown(False)
+            self.scribbler.toolsToggle[ind['brush']] = False
 
     def toggleRec(self):
-        if self.scribbler.recToggle == False:
-            self.Rectangle.setDefault(True)
-            self.scribbler.recToggle = True
-            self.scribbler.brushToggle = False
-            self.scribbler.lineToggle = False
+        ind = self.scribbler.index
+        if self.scribbler.toolsToggle[ind['rec']] == False:
+            self.Rectangle.setDown(True)
             del self.scribbler.linePoints[:]
-            self.scribbler.bucketToggle = False
+
+            for i in range (0,len(self.scribbler.toolsToggle)):
+                self.scribbler.toolsToggle[i] = False
+
+            self.scribbler.toolsToggle[ind['rec']] = True
         else:
-            self.Rectangle.setDefault(False)
-            self.scribbler.recToggle = False
+            self.Rectangle.setDown(False)
+            self.scribbler.toolsToggle[ind['rec']] = False
 
     def toggleLines(self):
-        if self.scribbler.lineToggle == False:
-            self.LineLinker.setDefault(True)
-            self.scribbler.recToggle = False
-            self.scribbler.brushToggle = False
-            self.scribbler.lineToggle = True
-            self.scribbler.bucketToggle = False
-        else:
-            self.LineLinker.setDefault(False)
-            self.scribbler.lineToggle = False
+        ind = self.scribbler.index
+        if self.scribbler.toolsToggle[ind['line']] == False:
+            self.LineLinker.setDown(True)
             del self.scribbler.linePoints[:]
 
-    def toggleBucket(self):
-        if self.scribbler.bucketToggle == False:
-            self.Bucket.setDefault(True)
-            self.scribbler.recToggle = False
-            self.scribbler.brushToggle = False
-            self.scribbler.lineToggle = False
-            del self.scribbler.linePoints[:]
-            self.scribbler.bucketToggle = True
+            for i in range (0,len(self.scribbler.toolsToggle)):
+                self.scribbler.toolsToggle[i] = False
+
+            self.scribbler.toolsToggle[ind['line']] = True
         else:
-            self.Bucket.setDefault(False)
-            self.scribbler.bucketToggle = False
+            self.LineLinker.setDown(False)
+            self.scribbler.toolsToggle[ind['line']] = False
+
+    def toggleBucket(self):
+        ind = self.scribbler.index
+        if self.scribbler.toolsToggle[ind['bucket']] == False:
+            self.Bucket.setDown(True)
+            del self.scribbler.linePoints[:]
+
+            for i in range (0,len(self.scribbler.toolsToggle)):
+                self.scribbler.toolsToggle[i] = False
+
+            self.scribbler.toolsToggle[ind['bucket']] = True
+        else:
+            self.Bucket.setDown(False)
+            self.scribbler.toolsToggle[ind['bucket']] = False
+
+    def toggleEraser(self):
+        ind = self.scribbler.index
+        if self.scribbler.toolsToggle[ind['eraser']] == False:
+            self.Eraser.setDown(True)
+            del self.scribbler.linePoints[:]
+
+            for i in range (0,len(self.scribbler.toolsToggle)):
+                self.scribbler.toolsToggle[i] = False
+
+            self.scribbler.toolsToggle[ind['eraser']] = True
+        else:
+            self.Eraser.setDown(False)
+            self.scribbler.toolsToggle[ind['eraser']] = False
