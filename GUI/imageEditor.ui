@@ -40,7 +40,7 @@
      </property>
      <property name="icon">
       <iconset>
-       <normaloff>paintbrush.png</normaloff>paintbrush.png</iconset>
+       <normaloff>Images/paintbrush.png</normaloff>Images/paintbrush.png</iconset>
      </property>
      <property name="iconSize">
       <size>
@@ -75,7 +75,7 @@
      </property>
      <property name="icon">
       <iconset>
-       <normaloff>rectangle.png</normaloff>rectangle.png</iconset>
+       <normaloff>Images/rectangle.png</normaloff>Images/rectangle.png</iconset>
      </property>
      <property name="iconSize">
       <size>
@@ -88,7 +88,7 @@
      <property name="geometry">
       <rect>
        <x>0</x>
-       <y>320</y>
+       <y>400</y>
        <width>45</width>
        <height>35</height>
       </rect>
@@ -98,7 +98,7 @@
      </property>
      <property name="icon">
       <iconset>
-       <normaloff>blackRec.jpg</normaloff>blackRec.jpg</iconset>
+       <normaloff>Images/blackRec.jpg</normaloff>Images/blackRec.jpg</iconset>
      </property>
      <property name="iconSize">
       <size>
@@ -121,7 +121,7 @@
      </property>
      <property name="icon">
       <iconset>
-       <normaloff>diagLine.png</normaloff>diagLine.png</iconset>
+       <normaloff>Images/diagLine.png</normaloff>Images/diagLine.png</iconset>
      </property>
      <property name="iconSize">
       <size>
@@ -144,12 +144,81 @@
      </property>
      <property name="icon">
       <iconset>
-       <normaloff>bucket.png</normaloff>bucket.png</iconset>
+       <normaloff>Images/bucket.png</normaloff>Images/bucket.png</iconset>
      </property>
      <property name="iconSize">
       <size>
        <width>35</width>
        <height>35</height>
+      </size>
+     </property>
+    </widget>
+    <widget class="QPushButton" name="Eraser">
+     <property name="geometry">
+      <rect>
+       <x>0</x>
+       <y>300</y>
+       <width>50</width>
+       <height>50</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string/>
+     </property>
+     <property name="icon">
+      <iconset>
+       <normaloff>Images/eraser.png</normaloff>Images/eraser.png</iconset>
+     </property>
+     <property name="iconSize">
+      <size>
+       <width>35</width>
+       <height>35</height>
+      </size>
+     </property>
+    </widget>
+    <widget class="QPushButton" name="WhiteRec">
+     <property name="geometry">
+      <rect>
+       <x>0</x>
+       <y>460</y>
+       <width>45</width>
+       <height>35</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string/>
+     </property>
+     <property name="icon">
+      <iconset>
+       <normaloff>Images/whiteRec.jpg</normaloff>Images/whiteRec.jpg</iconset>
+     </property>
+     <property name="iconSize">
+      <size>
+       <width>45</width>
+       <height>45</height>
+      </size>
+     </property>
+    </widget>
+    <widget class="QPushButton" name="RedRec">
+     <property name="geometry">
+      <rect>
+       <x>0</x>
+       <y>520</y>
+       <width>45</width>
+       <height>35</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string/>
+     </property>
+     <property name="icon">
+      <iconset>
+       <normaloff>Images/redRec.png</normaloff>Images/redRec.png</iconset>
+     </property>
+     <property name="iconSize">
+      <size>
+       <width>45</width>
+       <height>45</height>
       </size>
      </property>
     </widget>

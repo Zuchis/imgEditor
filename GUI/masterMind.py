@@ -19,7 +19,7 @@ class imageProcesser(QtGui.QWidget,QtGui.QWheelEvent):
         self.modified = False
         self.scribbling = False
         self.myPenWidth = 3
-        self.myPenColor = QtCore.Qt.red
+        self.brushColor = (255,0,0) 
         self.image = QtGui.QImage()
         self.toBeSaved = QtGui.QImage()
         self.binImage = QtGui.QImage()
@@ -138,7 +138,7 @@ class imageProcesser(QtGui.QWidget,QtGui.QWheelEvent):
             point = event.pos()
             self.recp2 = point
             #self.rectangleBuffer.fill(QtGui.qRgba(0,0,0,0))
-            self.showRec()
+            self.showRec((255,0,0))
 
     def mouseReleaseEvent(self, event):
         if event.button() == QtCore.Qt.LeftButton and self.scribbling:
@@ -212,7 +212,7 @@ class imageProcesser(QtGui.QWidget,QtGui.QWheelEvent):
                 self.drawnPixels.add((x2,y2))
                 self.lastPoint = QtCore.QPoint(endPoint)
                 draw = ImageDraw.Draw(self.img)
-                draw.line(((x1,y1),(x2,y2)),(255,0,0),2)
+                draw.line(((x1,y1),(x2,y2)),self.brushColor,2)
                 self.modified = True
                 self.swapBuffers(self.img)
                 self.update()
@@ -234,14 +234,14 @@ class imageProcesser(QtGui.QWidget,QtGui.QWheelEvent):
             self.swapBuffers(self.img)
             self.update()
 
-    def showRec(self):
+    def showRec(self,color):
             x = self.recp1.x()
             y = self.recp1.y()
             x2 = self.recp2.x()
             y2 = self.recp2.y()
             rectangleBuffer = Image.new('RGBA',self.img.size,(0,0,0,0))
             draw = ImageDraw.Draw(rectangleBuffer)
-            draw.rectangle(((x,y),(x2,y2)),None,(255,0,0))
+            draw.rectangle(((x,y),(x2,y2)),None,color)
             temp = self.img.copy()
             temp.paste(rectangleBuffer, (0,0), rectangleBuffer)
             self.swapBuffers(temp)
@@ -281,14 +281,19 @@ class imageProcesser(QtGui.QWidget,QtGui.QWheelEvent):
         return self.modified
 
     def penColor(self):
-        return self.myPenColor
+        return self.brushColor
 
     def penWidth(self):
         return self.myPenWidth
 
     def changeBlack(self):
-        self.myPenColor = QtCore.Qt.black
-        self.myPenWidth = 3
+        self.brushColor = (0,0,0) 
+
+    def changeWhite(self):
+        self.brushColor = (255,255,255) 
+
+    def changeRed(self):
+        self.brushColor = (255,0,0) 
 
     def undo(self):
         if len(self.imgList) > 0:
@@ -387,6 +392,8 @@ class gui(QtGui.QMainWindow, Ui_MainWindow,QtGui.QDialog):
         self.LineLinker.clicked.connect(self.toggleLines)
         self.Bucket.clicked.connect(self.toggleBucket)
         self.BlackRec.clicked.connect(self.scribbler.changeBlack)
+        self.WhiteRec.clicked.connect(self.scribbler.changeWhite)
+        self.RedRec.clicked.connect(self.scribbler.changeRed)
 
     def openFile(self):
         #fileName = QtGui.QFileDialog.getOpenFileName(self, "Abrir Imagem")
