@@ -19,12 +19,14 @@ class imageProcesser(QtGui.QWidget,QtGui.QWheelEvent):
         self.scribbling = False
         self.myPenWidth = 3
         self.brushColor = (255,0,0) 
+        self.eraserColor = (255,255,255)
         self.image = QtGui.QImage()
         self.toBeSaved = QtGui.QImage()
         self.binImage = QtGui.QImage()
         self.lastPoint = QtCore.QPoint()
         self.recp1 = QtCore.QPoint(-1,-1)
         self.recp2 = QtCore.QPoint(-1,-1)
+        self.eraserPoint = QtCore.QPoint(-1,-1)
         self.pointNull = QtCore.QPoint(-1,-1)
         toolsList = ['brush','rec','line','bucket','eraser'] 
         self.index = dict(zip(toolsList, [x for x in range(len(toolsList))]))
@@ -122,7 +124,17 @@ class imageProcesser(QtGui.QWidget,QtGui.QWheelEvent):
                 x = point.x()
                 y = point.y()
                 self.floodFill((x,y))
-
+        elif self.toolsToggle[self.index['eraser']] == True:
+            if event.button() == QtCore.Qt.LeftButton:
+                point = event.pos()
+                self.eraserPoint = point
+                x = point.x()
+                y = point.y()
+                r,g,b = self.img.getpixel((x,y))
+                if (r,g,b) >= (150,150,150):
+                    self.eraserColor = (0,0,0)
+                else:
+                    self.eraserColor = (255,255,255)
 
     def mouseMoveEvent(self, event):
         if (event.buttons() & QtCore.Qt.LeftButton) and self.scribbling:
@@ -136,7 +148,10 @@ class imageProcesser(QtGui.QWidget,QtGui.QWheelEvent):
             point = event.pos()
             self.recp2 = point
             #self.rectangleBuffer.fill(QtGui.qRgba(0,0,0,0))
-            self.showRec((255,0,0))
+            self.showRec(self.recp1, self.recp2,(255,0,0))
+        elif (event.buttons() & QtCore.Qt.LeftButton) and self.toolsToggle[self.index['eraser']] == True:
+            point = event.pos()
+            self.showRec(self.eraserPoint,point,self.eraserColor)
 
     def mouseReleaseEvent(self, event):
         if event.button() == QtCore.Qt.LeftButton and self.scribbling:
@@ -150,6 +165,9 @@ class imageProcesser(QtGui.QWidget,QtGui.QWheelEvent):
             point = event.pos()
             self.recp2 = point
             self.drawRec()
+        elif event.button() == QtCore.Qt.LeftButton and self.toolsToggle[self.index['eraser']] == True:
+            point = event.pos()
+            self.erase(point)
 
     def paintEvent(self, event):
         if self.fileName_:
@@ -232,11 +250,25 @@ class imageProcesser(QtGui.QWidget,QtGui.QWheelEvent):
             self.swapBuffers(self.img)
             self.update()
 
-    def showRec(self,color):
-            x = self.recp1.x()
-            y = self.recp1.y()
-            x2 = self.recp2.x()
-            y2 = self.recp2.y()
+    def erase(self,point):
+        self.imgList.append((self.img.copy(),0)) #add the instance for the undo function
+        x1 = self.eraserPoint.x()
+        y1 = self.eraserPoint.y()
+        x2 = point.x()
+        y2 = point.y()
+        draw = ImageDraw.Draw(self.img)
+        draw.rectangle(((x1,y1),(x2,y2)),(0,0,0),(0,0,0))
+        self.modified = True
+        self.canDrawRec = False
+        self.swapBuffers(self.img)
+        self.update()
+
+
+    def showRec(self,point1,point2,color):
+            x = point1.x()
+            y = point1.y()
+            x2 = point2.x()
+            y2 = point2.y()
             rectangleBuffer = Image.new('RGBA',self.img.size,(0,0,0,0))
             draw = ImageDraw.Draw(rectangleBuffer)
             draw.rectangle(((x,y),(x2,y2)),None,color)
@@ -389,6 +421,7 @@ class gui(QtGui.QMainWindow, Ui_MainWindow,QtGui.QDialog):
         self.Rectangle.clicked.connect(self.toggleRec)
         self.LineLinker.clicked.connect(self.toggleLines)
         self.Bucket.clicked.connect(self.toggleBucket)
+        self.Eraser.clicked.connect(self.toggleEraser)
         self.BlackRec.clicked.connect(self.scribbler.changeBlack)
         self.WhiteRec.clicked.connect(self.scribbler.changeWhite)
         self.RedRec.clicked.connect(self.scribbler.changeRed)
