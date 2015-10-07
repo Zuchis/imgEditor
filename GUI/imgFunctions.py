@@ -1,25 +1,23 @@
 from PIL import Image, ImageFilter
+from numpy import *
 
-#from numpy import *
 
-
-"""
 def gaussian_grid(size = 5):
 
 
-    Create a square grid of integers of gaussian shape
+    #Create a square grid of integers of gaussian shape
 
-    e.g. gaussian_grid() returns
+    #e.g. gaussian_grid() returns
 
-    array([[ 1,  4,  7,  4,  1],
+    #array([[ 1,  4,  7,  4,  1],
 
-           [ 4, 20, 33, 20,  4],
+           #[ 4, 20, 33, 20,  4],
 
-           [ 7, 33, 55, 33,  7],
+           #[ 7, 33, 55, 33,  7],
 
-           [ 4, 20, 33, 20,  4],
+           #[ 4, 20, 33, 20,  4],
 
-           [ 1,  4,  7,  4,  1]])
+           #[ 1,  4,  7,  4,  1]])
 
 
     m = size/2
@@ -52,22 +50,44 @@ class GAUSSIAN(ImageFilter.BuiltinFilter):
 
 
 
-im = Image.open('p2.jpg')
 
-im1 = im.filter(GAUSSIAN)
+def findBorder(image):
+    img = image.filter(ImageFilter.FIND_EDGES)
+    w,h = img.size
+    pim = img.load()
+    limit = (50,50,50)
 
-im1.show()
-"""
+    for j in range (0,h):
+        for i in range (0,w):
+            if pim[i,j] > limit:
+                paintBorder(img,(i,j))
+                break
+        else:
+            continue
+        break
+    return img
 
-img = Image.open('p2.jpg')
-img = img.filter(ImageFilter.FIND_EDGES)
-w,h = img.size
-pim = img.load()
-pstack = []
-limit = (50,50,50)
+def paintBorder(image,initPixel):
+    limit = (50,50,50)
+    w,h = image.size
+    pim = image.load()
+    pstack = [initPixel]
+    processedPixels = set()
+    while len(pstack) > 0:
+        x,y = pstack.pop()
+        if (x,y) not in processedPixels:
+            processedPixels.add((x,y))
+            if pim[x,y] > limit:
+                pim[x,y] = (255,0,0)
+                pstack.append((x + 1, y))
+                pstack.append((x - 1, y))
+                pstack.append((x, y + 1))
+                pstack.append((x, y - 1))
+            else:
+                pim[x,y] = (255,0,0)
 
-for j in range (0,h):
-    for i in range (0,l):
-        if pim[i,j] >= limit:
-
-
+if __name__ == '__main__':
+    img = Image.open('p2.jpg')
+    img = img.filter(GAUSSIAN)
+    img = findBorder(img)
+    img.show()
