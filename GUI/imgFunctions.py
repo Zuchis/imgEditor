@@ -1,5 +1,6 @@
 from PIL import Image, ImageFilter
 from numpy import *
+import sys
 
 
 def gaussian_grid(size = 5):
@@ -47,10 +48,6 @@ class GAUSSIAN(ImageFilter.BuiltinFilter):
     filterargs = (5,5), sum(gg), 0, tuple(gg)
 
 
-
-
-
-
 def findBorder(image):
     img = image.filter(ImageFilter.FIND_EDGES)
     w,h = img.size
@@ -87,7 +84,9 @@ def paintBorder(image,initPixel):
                 pim[x,y] = (255,0,0)
 
 if __name__ == '__main__':
-    img = Image.open('p2.jpg')
+    if len(sys.argv) != 2:
+        sys.exit(1)
+    img = Image.open(sys.argv[1])
     img = img.filter(GAUSSIAN)
     img = findBorder(img)
     img.show()
