@@ -1,7 +1,6 @@
-import sys
 from PyQt4 import *
 from imageEditor import *
-from PIL import Image, ImageDraw, ImageQt
+from imgFunctions import *
 from copy import *
 
 # TODO
@@ -33,6 +32,7 @@ class imageProcesser(QtGui.QWidget,QtGui.QWheelEvent):
         self.toolsToggle = [False,False,False,False,False]
         self.canDrawRec = True
         self.canSave = False
+        self.autoDetect = True
         self.fileName_ = None
         self.drawnPixels = set() 
         self.img = None 
@@ -65,6 +65,8 @@ class imageProcesser(QtGui.QWidget,QtGui.QWheelEvent):
         self.fileName_ = name 
         #self.image.load(name)
         self.img = Image.open(name)
+        if self.autoDetect:
+            self.img = findBorder(self.img)
         self.swapBuffers(self.img)
         self.modified = False
         self.lastSize = self.originalSize = self.img.size
@@ -247,9 +249,41 @@ class imageProcesser(QtGui.QWidget,QtGui.QWheelEvent):
                 draw.rectangle(((x-1,y-1),(x2+1,y2+1)),None,(255,0,0))
             self.modified = True
             self.canDrawRec = False
+            #if self.autoDetect:
+            self.detectOutside((255,0,0))
             self.swapBuffers(self.img)
             self.update()
 
+    def detectOutside(self,color):
+        w,h = self.img.size
+        pim = self.img.load()
+        limit =(10,10,10)
+        offset = 1
+        xOrigin = self.recp1.x()
+        xDestin = self.recp2.x()
+        yOrigin = self.recp1.y()
+        yDestin = self.recp2.y()
+        halfW = (w//2) + 1
+        halfH = (h//2) + 1
+        leftHalf = range(0,halfW)
+        rightHalf = range(halfW,w)
+        if xOrigin in leftHalf:
+            for j in range(yOrigin,yDestin):
+                for i in range(xOrigin+offset,xDestin):
+                    #print(i,j)
+                    if pim[i,j] == color or pim[i+1,j] >= limit:
+                        break;
+                    else:
+                        pim[i,j] = color
+        else:
+            for j in range(yOrigin,yDestin):
+                for i in range(xDestin-offset,xOrigin,-1):
+                    #print(i,j)
+                    if pim[i,j] == color:
+                        break;
+                    else:
+                        pim[i,j] = color
+            
     def erase(self,point):
         self.imgList.append((self.img.copy(),0)) #add the instance for the undo function
         x1 = self.eraserPoint.x()
@@ -380,6 +414,8 @@ class imageProcesser(QtGui.QWidget,QtGui.QWheelEvent):
         self.recp2.setX(int(round((self.recp2.x()*w)/self.lastSize[0])))
         self.recp2.setY(int(round((self.recp2.y()*h)/self.lastSize[1])))
 
+    def autoDetectToggle(self):
+        self.autoDetect = not self.autoDetect
         
 
 class gui(QtGui.QMainWindow, Ui_MainWindow,QtGui.QDialog):

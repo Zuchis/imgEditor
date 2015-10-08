@@ -3,7 +3,7 @@ from numpy import *
 import sys
 
 
-def gaussian_grid(size = 5):
+def gaussian_grid(size = 4):
 
 
     #Create a square grid of integers of gaussian shape
@@ -49,7 +49,9 @@ class GAUSSIAN(ImageFilter.BuiltinFilter):
 
 
 def findBorder(image):
-    img = image.filter(ImageFilter.FIND_EDGES)
+    toBePainted = image.copy()
+    img = image.filter(GAUSSIAN)
+    img = img.filter(ImageFilter.FIND_EDGES)
     w,h = img.size
     pim = img.load()
     limit = (50,50,50)
@@ -68,7 +70,11 @@ def findBorder(image):
         else:
             continue
         break
+    pim = toBePainted.load()
     for pixel in pixels:
+        pim[pixel[0],pixel[1]] = (255,0,0)
+
+    return toBePainted
 
     
 
@@ -97,8 +103,5 @@ if __name__ == '__main__':
     if len(sys.argv) != 2:
         sys.exit(1)
     img = Image.open(sys.argv[1])
-    filtered = img.filter(GAUSSIAN)
-    border = findBorder(filtered)
-    img.paste(border,(0,0),0)
-
+    img = findBorder(img)
     img.show()

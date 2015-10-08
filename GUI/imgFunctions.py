@@ -1,9 +1,9 @@
-from PIL import Image, ImageFilter
+from PIL import Image, ImageFilter, ImageDraw, ImageQt
 from numpy import *
 import sys
 
 
-def gaussian_grid(size = 5):
+def gaussian_grid(size = 4):
 
 
     #Create a square grid of integers of gaussian shape
@@ -49,44 +49,62 @@ class GAUSSIAN(ImageFilter.BuiltinFilter):
 
 
 def findBorder(image):
-    img = image.filter(ImageFilter.FIND_EDGES)
+    toBePainted = image.copy()
+    img = image.filter(GAUSSIAN)
+    img = img.filter(ImageFilter.FIND_EDGES)
     w,h = img.size
     pim = img.load()
     limit = (50,50,50)
 
+    #for j in range (0,h):
+        #for i in range (0,w):
+            #if pim[i,j] != (0,0,0):
+                #pim[i,j] = (255,255,255)
+    #img.show()
+
     for j in range (0,h):
         for i in range (0,w):
             if pim[i,j] > limit:
-                paintBorder(img,(i,j))
+                pixels = paintBorder(img,(i,j))
                 break
         else:
             continue
         break
-    return img
+    pim = toBePainted.load()
+    for pixel in pixels:
+        pim[pixel[0],pixel[1]] = (255,0,0)
+
+    return toBePainted
+
+    
 
 def paintBorder(image,initPixel):
-    limit = (50,50,50)
+    limit = (0,0,0)
     w,h = image.size
     pim = image.load()
     pstack = [initPixel]
     processedPixels = set()
     while len(pstack) > 0:
         x,y = pstack.pop()
-        if (x,y) not in processedPixels:
+        if (x,y) not in processedPixels and x not in (0,w) and y not in (0,h):
             processedPixels.add((x,y))
             if pim[x,y] > limit:
-                pim[x,y] = (255,0,0)
+                #pim[x,y] = (255,0,0)
                 pstack.append((x + 1, y))
                 pstack.append((x - 1, y))
                 pstack.append((x, y + 1))
                 pstack.append((x, y - 1))
             else:
-                pim[x,y] = (255,0,0)
+                #pim[x,y] = (255,0,0)
+                pass
+    return processedPixels
 
-if __name__ == '__main__':
-    if len(sys.argv) != 2:
-        sys.exit(1)
-    img = Image.open(sys.argv[1])
-    img = img.filter(GAUSSIAN)
-    img = findBorder(img)
-    img.show()
+############ DEBUGGING ############### 
+
+#if __name__ == '__main__':
+    #if len(sys.argv) != 2:
+        #sys.exit(1)
+    #img = Image.open(sys.argv[1])
+    #img = findBorder(img)
+    #img.show()
+#####################################
