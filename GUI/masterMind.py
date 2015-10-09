@@ -10,14 +10,13 @@ class imageProcesser(QtGui.QWidget,QtGui.QWheelEvent):
     def __init__(self,parent = None):
         super(imageProcesser, self).__init__(parent)
         self.setAttribute(QtCore.Qt.WA_StaticContents)
-        self.setGeometry(50,0,2000,2000)
+        self.setGeometry(50,50,2000,2000)
 
 
 #==========================ATRIBUTES================================
         self.modified = False
         self.scribbling = False
-        self.myPenWidth = 3
-        self.brushColor = (255,0,0) 
+        self.color = (255,0,0) 
         self.eraserColor = (255,255,255)
         self.image = QtGui.QImage()
         self.toBeSaved = QtGui.QImage()
@@ -36,9 +35,9 @@ class imageProcesser(QtGui.QWidget,QtGui.QWheelEvent):
         self.fileName_ = None
         self.drawnPixels = set() 
         self.img = None 
-        self.rThresh = 110
-        self.gThresh = 50 
-        self.bThresh = 50 
+        self.thresh = (150,150,150)
+        self.secondThresh = (255,255,255)
+        self.rThresh = 200
         self.linePoints = []
         self.imgList = []
         self.originalSize = None
@@ -182,7 +181,7 @@ class imageProcesser(QtGui.QWidget,QtGui.QWheelEvent):
             x1,y1 = self.linePoints[len(self.linePoints)-2]
             x2,y2 = self.linePoints[len(self.linePoints)-1]
             draw = ImageDraw.Draw(self.img)
-            draw.line(((x1,y1),(x2,y2)),(255,0,0),2)
+            draw.line(((x1,y1),(x2,y2)),self.color,2)
             self.modified = True
             self.swapBuffers(self.img)
             self.update()
@@ -196,10 +195,10 @@ class imageProcesser(QtGui.QWidget,QtGui.QWheelEvent):
             if (x,y) not in processedPixels:
                 r,g,b = self.img.getpixel((x,y))
                 processedPixels.add((x,y))
-                if r > self.rThresh and g < self.gThresh and b < self.bThresh: # check if the pixel is red
-                    self.img.putpixel((x,y),(255,255,255))
+                if r > 200 and g < 30 and b < 30: # check if the pixel is red
+                    self.img.putpixel((x,y),self.color)
                 else:
-                    self.img.putpixel((x,y),(255,255,255))
+                    self.img.putpixel((x,y),self.color)
                     pStack.append((x + 1, y))
                     pStack.append((x - 1, y))
                     pStack.append((x, y + 1))
@@ -230,7 +229,7 @@ class imageProcesser(QtGui.QWidget,QtGui.QWheelEvent):
                 self.drawnPixels.add((x2,y2))
                 self.lastPoint = QtCore.QPoint(endPoint)
                 draw = ImageDraw.Draw(self.img)
-                draw.line(((x1,y1),(x2,y2)),self.brushColor,2)
+                draw.line(((x1,y1),(x2,y2)),self.color,2)
                 self.modified = True
                 self.swapBuffers(self.img)
                 self.update()
@@ -257,32 +256,32 @@ class imageProcesser(QtGui.QWidget,QtGui.QWheelEvent):
     def detectOutside(self,color):
         w,h = self.img.size
         pim = self.img.load()
-        limit =(10,10,10)
+        limit =(25,25,25)
         offset = 1
         xOrigin = self.recp1.x()
         xDestin = self.recp2.x()
         yOrigin = self.recp1.y()
         yDestin = self.recp2.y()
-        halfW = (w//2) + 1
-        halfH = (h//2) + 1
-        leftHalf = range(0,halfW)
-        rightHalf = range(halfW,w)
-        if xOrigin in leftHalf:
-            for j in range(yOrigin,yDestin):
-                for i in range(xOrigin+offset,xDestin):
-                    #print(i,j)
-                    if pim[i,j] == color or pim[i+1,j] >= limit:
-                        break;
-                    else:
-                        pim[i,j] = color
-        else:
-            for j in range(yOrigin,yDestin):
-                for i in range(xDestin-offset,xOrigin,-1):
-                    #print(i,j)
-                    if pim[i,j] == color:
-                        break;
-                    else:
-                        pim[i,j] = color
+        #halfW = (w//2) + 1
+        #halfH = (h//2) + 1
+        #leftHalf = range(0,halfW)
+        #rightHalf = range(halfW,w)
+        #if xOrigin in leftHalf:
+        for j in range(yOrigin,yDestin):
+            for i in range(xOrigin+offset,xDestin):
+                #print(i,j)
+                if pim[i,j] == color or pim[i,j] >= limit:
+                    break;
+                else:
+                    pim[i,j] = color
+        #else:
+        for j in range(yOrigin,yDestin):
+            for i in range(xDestin-offset,xOrigin,-1):
+                #print(i,j)
+                if pim[i,j] == color or pim[i,j] >= limit:
+                    break;
+                else:
+                    pim[i,j] = color
             
     def erase(self,point):
         self.imgList.append((self.img.copy(),0)) #add the instance for the undo function
@@ -333,7 +332,7 @@ class imageProcesser(QtGui.QWidget,QtGui.QWheelEvent):
         for i in range (xOrigin+offset,xDestin+offset):
             for j in range (yOrigin,yDestin):
                 r,g,b = self.img.getpixel((i,j)) 
-                if r > self.rThresh and g > self.gThresh and b > self.bThresh: #check if it is white
+                if (r,g,b) >= self.thresh: #check if it is grey or white
                     self.img.putpixel((i,j),(255,255,255))
                 elif r < self.rThresh: # if it isn't, check if it is a red one
                     self.img.putpixel((i,j),(0,0,0))
@@ -345,19 +344,16 @@ class imageProcesser(QtGui.QWidget,QtGui.QWheelEvent):
         return self.modified
 
     def penColor(self):
-        return self.brushColor
-
-    def penWidth(self):
-        return self.myPenWidth
+        return self.color
 
     def changeBlack(self):
-        self.brushColor = (0,0,0) 
+        self.color = (0,0,0) 
 
     def changeWhite(self):
-        self.brushColor = (255,255,255) 
+        self.color = (255,255,255) 
 
     def changeRed(self):
-        self.brushColor = (255,0,0) 
+        self.color = (255,0,0)
 
     def undo(self):
         if len(self.imgList) > 0:
@@ -452,6 +448,9 @@ class gui(QtGui.QMainWindow, Ui_MainWindow,QtGui.QDialog):
         QtCore.QObject.connect(self.actionAmpliar, QtCore.SIGNAL(("activated()")), self.scribbler.zoom)
         QtCore.QObject.connect(self.actionReduzir_uma_vez, QtCore.SIGNAL(("activated()")), self.scribbler.zoomOut)
         QtCore.QObject.connect(self.actionTamanho_Original, QtCore.SIGNAL(("activated()")), self.scribbler.setOriginalSize)
+        QtCore.QObject.connect(self.PrimaryBar, QtCore.SIGNAL(("valueChanged(int)")), self.setPrimaryValue)
+        QtCore.QObject.connect(self.SecondaryBar, QtCore.SIGNAL(("valueChanged(int)")), self.setSecondaryValue)
+        QtCore.QObject.connect(self.PrimaryValue, QtCore.SIGNAL(("returnPressed()")), self.setPrimaryBar)
 
         self.Brush.clicked.connect(self.toggleBrush)
         self.Rectangle.clicked.connect(self.toggleRec)
@@ -461,6 +460,8 @@ class gui(QtGui.QMainWindow, Ui_MainWindow,QtGui.QDialog):
         self.BlackRec.clicked.connect(self.scribbler.changeBlack)
         self.WhiteRec.clicked.connect(self.scribbler.changeWhite)
         self.RedRec.clicked.connect(self.scribbler.changeRed)
+        self.lastPrimaryValue = 150
+        self.lastSecondaryValue = 255
 
     def openFile(self):
         #fileName = QtGui.QFileDialog.getOpenFileName(self, "Abrir Imagem")
@@ -568,3 +569,29 @@ class gui(QtGui.QMainWindow, Ui_MainWindow,QtGui.QDialog):
         else:
             self.Eraser.setDown(False)
             self.scribbler.toolsToggle[ind['eraser']] = False
+
+    def setPrimaryValue(self):
+        value = self.PrimaryBar.value()
+        self.scribbler.thresh = (value,value,value)
+        self.PrimaryValue.setText(str(value))
+
+    def setSecondaryValue(self):
+        value = self.SecondaryBar.value()
+        self.scribbler.secondThresh = (value,value,value)
+        self.SecondaryValue.setText(str(value))
+
+    def setPrimaryBar(self):
+        try:
+            value = int(self.PrimaryValue.text())
+        except ValueError:
+            print("Está querendo trollar safadinho?")
+            self.PrimaryValue.setText(str(self.lastPrimaryValue))
+            return
+        if value > 255:
+            print("Apenas entre 0 e 255 malandrão")
+            self.PrimaryValue.setText(str(self.lastPrimaryValue))
+            return
+        self.scribbler.thresh = (value,value,value)
+        self.PrimaryBar.setSliderPosition(value)
+        self.lastPrimaryValue = value
+

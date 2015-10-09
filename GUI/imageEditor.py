@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'imageEditor.ui'
 #
-# Created: Sun Oct  4 19:14:08 2015
+# Created: Fri Oct  9 17:46:44 2015
 #      by: PyQt4 UI code generator 4.10.4
 #
 # WARNING! All changes made in this file will be lost!
@@ -101,6 +101,36 @@ class Ui_MainWindow(object):
         self.RedRec.setIcon(icon7)
         self.RedRec.setIconSize(QtCore.QSize(45, 45))
         self.RedRec.setObjectName(_fromUtf8("RedRec"))
+        self.PrimaryBar = QtGui.QSlider(self.centralwidget)
+        self.PrimaryBar.setGeometry(QtCore.QRect(190, 10, 160, 29))
+        self.PrimaryBar.setMaximum(255)
+        self.PrimaryBar.setSliderPosition(150)
+        self.PrimaryBar.setOrientation(QtCore.Qt.Horizontal)
+        self.PrimaryBar.setTickPosition(QtGui.QSlider.TicksBelow)
+        self.PrimaryBar.setObjectName(_fromUtf8("PrimaryBar"))
+        self.label = QtGui.QLabel(self.centralwidget)
+        self.label.setGeometry(QtCore.QRect(30, 20, 111, 17))
+        self.label.setObjectName(_fromUtf8("label"))
+        self.PrimaryValue = QtGui.QLineEdit(self.centralwidget)
+        self.PrimaryValue.setGeometry(QtCore.QRect(140, 10, 41, 27))
+        self.PrimaryValue.setObjectName(_fromUtf8("PrimaryValue"))
+        self.label_2 = QtGui.QLabel(self.centralwidget)
+        self.label_2.setGeometry(QtCore.QRect(360, 20, 121, 17))
+        self.label_2.setObjectName(_fromUtf8("label_2"))
+        self.SecondaryBar = QtGui.QSlider(self.centralwidget)
+        self.SecondaryBar.setGeometry(QtCore.QRect(540, 10, 160, 29))
+        self.SecondaryBar.setMaximum(255)
+        self.SecondaryBar.setSliderPosition(255)
+        self.SecondaryBar.setOrientation(QtCore.Qt.Horizontal)
+        self.SecondaryBar.setTickPosition(QtGui.QSlider.TicksBelow)
+        self.SecondaryBar.setObjectName(_fromUtf8("SecondaryBar"))
+        self.SecondaryValue = QtGui.QLineEdit(self.centralwidget)
+        self.SecondaryValue.setGeometry(QtCore.QRect(490, 10, 41, 27))
+        self.SecondaryValue.setObjectName(_fromUtf8("SecondaryValue"))
+        self.SecondaryActivate = QtGui.QCheckBox(self.centralwidget)
+        self.SecondaryActivate.setGeometry(QtCore.QRect(700, 10, 21, 22))
+        self.SecondaryActivate.setText(_fromUtf8(""))
+        self.SecondaryActivate.setObjectName(_fromUtf8("SecondaryActivate"))
         MainWindow.setCentralWidget(self.centralwidget)
         self.menubar = QtGui.QMenuBar(MainWindow)
         self.menubar.setGeometry(QtCore.QRect(0, 0, 1000, 25))
@@ -153,6 +183,10 @@ class Ui_MainWindow(object):
 
     def retranslateUi(self, MainWindow):
         MainWindow.setWindowTitle(_translate("MainWindow", "MainWindow", None))
+        self.label.setText(_translate("MainWindow", "Limite Primário", None))
+        self.PrimaryValue.setText(_translate("MainWindow", "150", None))
+        self.label_2.setText(_translate("MainWindow", "Limite Secundário", None))
+        self.SecondaryValue.setText(_translate("MainWindow", "255", None))
         self.menuArquivo.setTitle(_translate("MainWindow", "Arquivo", None))
         self.menuSobre.setTitle(_translate("MainWindow", "Sobre", None))
         self.menuEditar.setTitle(_translate("MainWindow", "Editar", None))
