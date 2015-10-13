@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'imageEditor.ui'
 #
-# Created: Fri Oct  9 17:46:44 2015
+# Created: Tue Oct 13 17:32:28 2015
 #      by: PyQt4 UI code generator 4.10.4
 #
 # WARNING! All changes made in this file will be lost!
@@ -130,7 +130,18 @@ class Ui_MainWindow(object):
         self.SecondaryActivate = QtGui.QCheckBox(self.centralwidget)
         self.SecondaryActivate.setGeometry(QtCore.QRect(700, 10, 21, 22))
         self.SecondaryActivate.setText(_fromUtf8(""))
+        self.SecondaryActivate.setChecked(True)
+        self.SecondaryActivate.setTristate(False)
         self.SecondaryActivate.setObjectName(_fromUtf8("SecondaryActivate"))
+        self.label_3 = QtGui.QLabel(self.centralwidget)
+        self.label_3.setGeometry(QtCore.QRect(740, 20, 131, 17))
+        self.label_3.setObjectName(_fromUtf8("label_3"))
+        self.AutoDetectToggle = QtGui.QCheckBox(self.centralwidget)
+        self.AutoDetectToggle.setGeometry(QtCore.QRect(880, 10, 21, 22))
+        self.AutoDetectToggle.setText(_fromUtf8(""))
+        self.AutoDetectToggle.setChecked(True)
+        self.AutoDetectToggle.setTristate(False)
+        self.AutoDetectToggle.setObjectName(_fromUtf8("AutoDetectToggle"))
         MainWindow.setCentralWidget(self.centralwidget)
         self.menubar = QtGui.QMenuBar(MainWindow)
         self.menubar.setGeometry(QtCore.QRect(0, 0, 1000, 25))
@@ -187,6 +198,7 @@ class Ui_MainWindow(object):
         self.PrimaryValue.setText(_translate("MainWindow", "150", None))
         self.label_2.setText(_translate("MainWindow", "Limite Secundário", None))
         self.SecondaryValue.setText(_translate("MainWindow", "255", None))
+        self.label_3.setText(_translate("MainWindow", "Detecção do Crânio", None))
         self.menuArquivo.setTitle(_translate("MainWindow", "Arquivo", None))
         self.menuSobre.setTitle(_translate("MainWindow", "Sobre", None))
         self.menuEditar.setTitle(_translate("MainWindow", "Editar", None))

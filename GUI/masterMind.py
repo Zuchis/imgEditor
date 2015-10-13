@@ -36,15 +36,17 @@ class imageProcesser(QtGui.QWidget,QtGui.QWheelEvent):
         self.fileName_ = None
         self.drawnPixels = set() 
         self.img = None 
-        self.thresh = (150,150,150)
+        self.thresh = 150
         self.secondThresh = (255,255,255)
-        self.rThresh = 200
+        self.secondToggle = True
+        self.rThresh = 250
         self.linePoints = []
         self.imgList = []
         self.originalSize = None
         self.originalImage = None
         self.lastSize = None
         self.zoomFactor = 1.15
+        self.zoomCounter = 0
 #=====================================================================
 
 
@@ -327,18 +329,47 @@ class imageProcesser(QtGui.QWidget,QtGui.QWheelEvent):
         yDestin = self.recp2.y()
         xRange = range(xOrigin,xDestin)
         yRange = range(yOrigin,yDestin)
+        processedPixels = set()
+        pStack = []
+        pim = self.img.load()
         for i in range (0,w):
             for j in range (0,h):
                 if i not in xRange or j not in yRange:
-                    self.img.putpixel((i,j),(0,0,0))
+                    pim[i,j] = (0,0,0)
 
-        for i in range (xOrigin+offset,xDestin+offset):
-            for j in range (yOrigin,yDestin):
-                r,g,b = self.img.getpixel((i,j)) 
-                if (r,g,b) >= self.thresh: #check if it is grey or white
-                    self.img.putpixel((i,j),(255,255,255))
-                elif r < self.rThresh: # if it isn't, check if it is a red one
-                    self.img.putpixel((i,j),(0,0,0))
+        if self.secondToggle == False:
+            for i in range (xOrigin+offset,xDestin+offset):
+                for j in range (yOrigin,yDestin):
+                    if pim[i,j][0] >= self.thresh and pim[i,j][1] >= self.thresh and pim[i,j][2] >= self.thresh: #check if it is grey or white
+                        pim[i,j] = (255,255,255)
+                    elif pim[i,j][0] < self.rThresh: # if it isn't, check if it is a red one
+                        pim[i,j] = (0,0,0)
+
+        else:
+            for i in range (xOrigin+offset,xDestin+offset):
+                for j in range (yOrigin,yDestin):
+                    if pim[i,j][0] >= self.thresh and pim[i,j][1] >= self.thresh and pim[i,j][2] >= self.thresh: #check if it is grey or white
+                        pim[i,j] = (255,255,255)
+                        processedPixels.add((i,j))
+                        pStack.append((i + 1, j))
+                        pStack.append((i - 1, j))
+                        pStack.append((i, j + 1))
+                        pStack.append((i, j - 1))
+                    elif pim[i,j][0] < self.rThresh: # if it isn't, check if it is a red one
+                        pim[i,j] = (0,0,0)
+
+            while len(pStack) > 0:
+                x,y = pStack.pop()
+                if (x,y) not in processedPixels:
+                    processedPixels.add((x,y))
+                    if pim[x,y][0] >= self.secondThresh and pim[x,y][1] >= self.secondThresh and pim[x,y][2] >= self.secondThresh: # check if the pixel is red
+                        self.img.putpixel((x,y),(255,255,255))
+                    else:
+                        self.img.putpixel((x,y),(255,255,255))
+                        pStack.append((x + 1, y))
+                        pStack.append((x - 1, y))
+                        pStack.append((x, y + 1))
+                        pStack.append((x, y - 1))
 
         self.swapBuffers(self.img)
         self.update()
@@ -381,6 +412,7 @@ class imageProcesser(QtGui.QWidget,QtGui.QWheelEvent):
         if self.recp1 != self.pointNull and self.recp2 != self.pointNull:
             self.setRecp(1)
             self.lastSize = (w,h)
+        self.zoomCounter += 1
         self.update()
 
     def zoomOut(self):
@@ -393,6 +425,8 @@ class imageProcesser(QtGui.QWidget,QtGui.QWheelEvent):
             if self.recp1 != self.pointNull and self.recp2 != self.pointNull:
                 self.setRecp(0)
                 self.lastSize = (w,h)
+            if self.zoomCounter > 0:
+                self.zoomCounter -= 1
             self.update()
 
     def setOriginalSize(self):
@@ -418,10 +452,11 @@ class imageProcesser(QtGui.QWidget,QtGui.QWheelEvent):
             self.recp2.setX(int(round(self.recp2.x()/self.zoomFactor)))
             self.recp2.setY(int(round(self.recp2.y()/self.zoomFactor)))
         else:
-            self.recp1.setX(int(round(self.recp1.x()/self.zoomFactor)))
-            self.recp1.setY(int(round(self.recp1.y()/self.zoomFactor)))
-            self.recp2.setX(int(round(self.recp2.x()/self.zoomFactor)))
-            self.recp2.setY(int(round(self.recp2.y()/self.zoomFactor)))
+            self.recp1.setX(int(round(self.recp1.x()/self.zoomFactor**self.zoomCounter)))
+            self.recp1.setY(int(round(self.recp1.y()/self.zoomFactor**self.zoomCounter)))
+            self.recp2.setX(int(round(self.recp2.x()/self.zoomFactor**self.zoomCounter)))
+            self.recp2.setY(int(round(self.recp2.y()/self.zoomFactor**self.zoomCounter)))
+            self.zoomCounter = 0
 
     def autoDetectToggle(self):
         self.autoDetect = not self.autoDetect
@@ -465,6 +500,8 @@ class gui(QtGui.QMainWindow, Ui_MainWindow,QtGui.QDialog):
         QtCore.QObject.connect(self.SecondaryBar, QtCore.SIGNAL(("valueChanged(int)")), self.setSecondaryValue)
         QtCore.QObject.connect(self.PrimaryValue, QtCore.SIGNAL(("returnPressed()")), self.setPrimaryBar)
         QtCore.QObject.connect(self.SecondaryValue, QtCore.SIGNAL(("returnPressed()")), self.setSecondaryBar)
+        QtCore.QObject.connect(self.SecondaryActivate, QtCore.SIGNAL(("stateChanged(int)")), self.secondThresholdToggle)
+        QtCore.QObject.connect(self.AutoDetectToggle, QtCore.SIGNAL(("stateChanged(int)")), self.scribbler.autoDetectToggle)
 
         self.Brush.clicked.connect(self.toggleBrush)
         self.Rectangle.clicked.connect(self.toggleRec)
@@ -586,7 +623,7 @@ class gui(QtGui.QMainWindow, Ui_MainWindow,QtGui.QDialog):
 
     def setPrimaryValue(self):
         value = self.PrimaryBar.value()
-        self.scribbler.thresh = (value,value,value)
+        self.scribbler.thresh = value
         self.PrimaryValue.setText(str(value))
 
     def setSecondaryValue(self):
@@ -605,7 +642,7 @@ class gui(QtGui.QMainWindow, Ui_MainWindow,QtGui.QDialog):
             print("Apenas entre 0 e 255 malandrão")
             self.PrimaryValue.setText(str(self.lastPrimaryValue))
             return
-        self.scribbler.thresh = (value,value,value)
+        self.scribbler.thresh = value 
         self.PrimaryBar.setSliderPosition(value)
         self.lastPrimaryValue = value
 
@@ -623,3 +660,6 @@ class gui(QtGui.QMainWindow, Ui_MainWindow,QtGui.QDialog):
         self.scribbler.secondThresh = (value,value,value)
         self.SecondaryBar.setSliderPosition(value)
         self.lastSecondaryValue = value
+
+    def secondThresholdToggle(self):
+        self.scribbler.secondToggle = not self.scribbler.secondToggle
