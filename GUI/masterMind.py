@@ -1,3 +1,4 @@
+from __future__ import division
 from PyQt4 import *
 from imageEditor import *
 from imgFunctions import *
@@ -41,6 +42,7 @@ class imageProcesser(QtGui.QWidget,QtGui.QWheelEvent):
         self.linePoints = []
         self.imgList = []
         self.originalSize = None
+        self.originalImage = None
         self.lastSize = None
         self.zoomFactor = 1.15
 #=====================================================================
@@ -69,6 +71,7 @@ class imageProcesser(QtGui.QWidget,QtGui.QWheelEvent):
         self.swapBuffers(self.img)
         self.modified = False
         self.lastSize = self.originalSize = self.img.size
+        self.originalImage = self.img.copy()
         self.update()
         return True
 
@@ -369,28 +372,26 @@ class imageProcesser(QtGui.QWidget,QtGui.QWheelEvent):
             self.update()
 
     def zoom(self):
-        w = int(round(self.image.width() * self.zoomFactor))
-        h = int(round(self.image.height() * self.zoomFactor))
+        w,h = self.img.size
+        w = int(round(w * self.zoomFactor))
+        h = int(round(h * self.zoomFactor))
         #self.imageLabel.setPixmap(QtGui.QPixmap.fromImage(self.image))
         self.img = self.img.resize((w,h), Image.BICUBIC)
         self.swapBuffers(self.img)
         if self.recp1 != self.pointNull and self.recp2 != self.pointNull:
-            self.setRecp(w,h)
+            self.setRecp(1)
             self.lastSize = (w,h)
         self.update()
 
     def zoomOut(self):
-        w = float(self.image.width()) / self.zoomFactor
-        w = int(round(w))
-        h = float(self.image.height()) / self.zoomFactor
-        h = int(round(h))
+        w,h = self.img.size
+        w = int(round(w / self.zoomFactor))
+        h = int(round(h / self.zoomFactor))
         if w >= self.originalSize[0] and h >= self.originalSize[1]:
-            #self.setGeometry(50,0,w,h)
-            #self.image = self.image.scaled(w,h,QtCore.Qt.KeepAspectRatio)
             self.img = self.img.resize((w,h), Image.BICUBIC)
             self.swapBuffers(self.img)
             if self.recp1 != self.pointNull and self.recp2 != self.pointNull:
-                self.setRecp(w,h)
+                self.setRecp(0)
                 self.lastSize = (w,h)
             self.update()
 
@@ -400,15 +401,27 @@ class imageProcesser(QtGui.QWidget,QtGui.QWheelEvent):
             self.img = self.img.resize((w,h), Image.BICUBIC)
             self.swapBuffers(self.img)
             if self.recp1 != self.pointNull and self.recp2 != self.pointNull:
-                self.setRecp(w,h)
+                self.setRecp(666)
                 self.lastSize = (w,h)
             self.update()
 
-    def setRecp(self,w,h):
-        self.recp1.setX(int(round((self.recp1.x()*w)/self.lastSize[0])))
-        self.recp1.setY(int(round((self.recp1.y()*h)/self.lastSize[1])))
-        self.recp2.setX(int(round((self.recp2.x()*w)/self.lastSize[0])))
-        self.recp2.setY(int(round((self.recp2.y()*h)/self.lastSize[1])))
+    def setRecp(self,n):
+        w,h = self.img.size
+        if n == 1:
+            self.recp1.setX(int(round(self.recp1.x()*self.zoomFactor)))
+            self.recp1.setY(int(round(self.recp1.y()*self.zoomFactor)))
+            self.recp2.setX(int(round(self.recp2.x()*self.zoomFactor)))
+            self.recp2.setY(int(round(self.recp2.y()*self.zoomFactor)))
+        elif n == 0:
+            self.recp1.setX(int(round(self.recp1.x()/self.zoomFactor)))
+            self.recp1.setY(int(round(self.recp1.y()/self.zoomFactor)))
+            self.recp2.setX(int(round(self.recp2.x()/self.zoomFactor)))
+            self.recp2.setY(int(round(self.recp2.y()/self.zoomFactor)))
+        else:
+            self.recp1.setX(int(round(self.recp1.x()/self.zoomFactor)))
+            self.recp1.setY(int(round(self.recp1.y()/self.zoomFactor)))
+            self.recp2.setX(int(round(self.recp2.x()/self.zoomFactor)))
+            self.recp2.setY(int(round(self.recp2.y()/self.zoomFactor)))
 
     def autoDetectToggle(self):
         self.autoDetect = not self.autoDetect
@@ -451,6 +464,7 @@ class gui(QtGui.QMainWindow, Ui_MainWindow,QtGui.QDialog):
         QtCore.QObject.connect(self.PrimaryBar, QtCore.SIGNAL(("valueChanged(int)")), self.setPrimaryValue)
         QtCore.QObject.connect(self.SecondaryBar, QtCore.SIGNAL(("valueChanged(int)")), self.setSecondaryValue)
         QtCore.QObject.connect(self.PrimaryValue, QtCore.SIGNAL(("returnPressed()")), self.setPrimaryBar)
+        QtCore.QObject.connect(self.SecondaryValue, QtCore.SIGNAL(("returnPressed()")), self.setSecondaryBar)
 
         self.Brush.clicked.connect(self.toggleBrush)
         self.Rectangle.clicked.connect(self.toggleRec)
@@ -595,3 +609,17 @@ class gui(QtGui.QMainWindow, Ui_MainWindow,QtGui.QDialog):
         self.PrimaryBar.setSliderPosition(value)
         self.lastPrimaryValue = value
 
+    def setSecondaryBar(self):
+        try:
+            value = int(self.SecondaryValue.text())
+        except ValueError:
+            print("Está querendo trollar safadinho?")
+            self.SecondaryValue.setText(str(self.lastSecondaryValue))
+            return
+        if value > 255:
+            print("Apenas entre 0 e 255 malandrão")
+            self.SecondaryValue.setText(str(self.lastSecondaryValue))
+            return
+        self.scribbler.secondThresh = (value,value,value)
+        self.SecondaryBar.setSliderPosition(value)
+        self.lastSecondaryValue = value
