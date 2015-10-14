@@ -37,7 +37,7 @@ class imageProcesser(QtGui.QWidget,QtGui.QWheelEvent):
         self.drawnPixels = set() 
         self.img = None 
         self.thresh = 150
-        self.secondThresh = (255,255,255)
+        self.secondThresh = 255
         self.secondToggle = True
         self.rThresh = 250
         self.linePoints = []
@@ -350,7 +350,7 @@ class imageProcesser(QtGui.QWidget,QtGui.QWheelEvent):
                 for j in range (yOrigin,yDestin):
                     if pim[i,j][0] >= self.thresh and pim[i,j][1] >= self.thresh and pim[i,j][2] >= self.thresh: #check if it is grey or white
                         pim[i,j] = (255,255,255)
-                        processedPixels.add((i,j))
+                        #processedPixels.add((i,j))
                         pStack.append((i + 1, j))
                         pStack.append((i - 1, j))
                         pStack.append((i, j + 1))
@@ -363,13 +363,13 @@ class imageProcesser(QtGui.QWidget,QtGui.QWheelEvent):
                 if (x,y) not in processedPixels:
                     processedPixels.add((x,y))
                     if pim[x,y][0] >= self.secondThresh and pim[x,y][1] >= self.secondThresh and pim[x,y][2] >= self.secondThresh: # check if the pixel is red
-                        self.img.putpixel((x,y),(255,255,255))
-                    else:
-                        self.img.putpixel((x,y),(255,255,255))
+                        pim[x,y] = (255,255,255)
                         pStack.append((x + 1, y))
                         pStack.append((x - 1, y))
                         pStack.append((x, y + 1))
                         pStack.append((x, y - 1))
+                    else:
+                        pim[x,y] = (255,255,255)
 
         self.swapBuffers(self.img)
         self.update()
@@ -628,7 +628,7 @@ class gui(QtGui.QMainWindow, Ui_MainWindow,QtGui.QDialog):
 
     def setSecondaryValue(self):
         value = self.SecondaryBar.value()
-        self.scribbler.secondThresh = (value,value,value)
+        self.scribbler.secondThresh = value
         self.SecondaryValue.setText(str(value))
 
     def setPrimaryBar(self):
@@ -657,7 +657,7 @@ class gui(QtGui.QMainWindow, Ui_MainWindow,QtGui.QDialog):
             print("Apenas entre 0 e 255 malandrão")
             self.SecondaryValue.setText(str(self.lastSecondaryValue))
             return
-        self.scribbler.secondThresh = (value,value,value)
+        self.scribbler.secondThresh = value
         self.SecondaryBar.setSliderPosition(value)
         self.lastSecondaryValue = value
 
