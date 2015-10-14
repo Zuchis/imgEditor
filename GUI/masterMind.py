@@ -1,6 +1,7 @@
 from __future__ import division
 from PyQt4 import *
 from imageEditor import *
+from dialog import *
 from imgFunctions import *
 from copy import *
 
@@ -636,6 +637,13 @@ class gui(QtGui.QMainWindow, Ui_MainWindow,QtGui.QDialog):
             value = int(self.PrimaryValue.text())
         except ValueError:
             print("Está querendo trollar safadinho?")
+            diag = dialogBox(self.centralwidget)
+            diag.text.setHtml("<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.0//EN\" \"http://www.w3.org/TR/REC-html40/strict.dtd\">\n"
+"<html><head><meta name=\"qrichtext\" content=\"1\" /><style type=\"text/css\">\n"
+"p, li { white-space: pre-wrap; }\n"
+"</style></head><body style=\" font-family:\'Ubuntu\'; font-size:11pt; font-weight:400; font-style:normal;\">\n"
+"<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\">Hello World!</p></body></html>")
+            diag.show()
             self.PrimaryValue.setText(str(self.lastPrimaryValue))
             return
         if value > 255:
@@ -663,3 +671,16 @@ class gui(QtGui.QMainWindow, Ui_MainWindow,QtGui.QDialog):
 
     def secondThresholdToggle(self):
         self.scribbler.secondToggle = not self.scribbler.secondToggle
+
+
+class dialogBox(QtGui.QWidget):
+    def __init__(self,parent = None):
+        super(dialogBox, self).__init__(parent)
+        self.setAttribute(QtCore.Qt.WA_StaticContents)
+        self.setGeometry(500,500,500,500)
+        self.text = QtGui.QTextEdit(self)
+        self.text.setGeometry(QtCore.QRect(10, 10, 431, 171))
+        self.text.setReadOnly(True)
+        self.ok = QtGui.QPushButton(self)
+        self.ok.setGeometry(QtCore.QRect(170, 190, 98, 27))
+        QtCore.QObject.connect(self.ok, QtCore.SIGNAL(("clicked()")), self.close)
