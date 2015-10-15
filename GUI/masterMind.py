@@ -4,8 +4,6 @@ from imageEditor import *
 from imgFunctions import *
 from copy import *
 
-# TODO
-# Adicionar dialogos para: modificação de arquivos; avisar que a imagem não foi binarizada
 
 htmlPrefix = "<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.0//EN\" \"http://www.w3.org/TR/REC-html40/strict.dtd\">\n"
 "<html><head><meta name=\"qrichtext\" content=\"1\" /><style type=\"text/css\">\n"
@@ -41,7 +39,6 @@ class imageProcesser(QtGui.QWidget,QtGui.QWheelEvent):
         self.canSave = False
         self.autoDetect = True
         self.fileName_ = None
-        self.drawnPixels = set() 
         self.img = None 
         self.thresh = 150
         self.secondThresh = 255
@@ -62,19 +59,17 @@ class imageProcesser(QtGui.QWidget,QtGui.QWheelEvent):
         self.image = pilToQt
 
     def openImage(self, fileName):
-        #loadedImage = QtGui.QImage()
-        #if not loadedImage.load(fileName):
-            #return False
+        loadedImage = QtGui.QImage()
+        if not loadedImage.load(fileName):
+            diag = dialogBox()
+            diag.text.setHtml(htmlPrefix + 'Não foi possível abrir a imagem, tente novamente.' + htmlSuffix)
+            diag.exec_()
+            return False
 
-        name = 'p2.jpg'
-        ##newSize = loadedImage.size().expandedTo(self.size())
-        ##self.resizeImage(loadedImage, newSize)
-        #self.image = loadedImage
-        #self.fileName_ = fileName
-        #self.img = Image.open(self.fileName_)
-        self.fileName_ = name 
-        #self.image.load(name)
-        self.img = Image.open(name)
+        #newSize = loadedImage.size().expandedTo(self.size())
+        #self.resizeImage(loadedImage, newSize)
+        self.fileName_ = fileName
+        self.img = Image.open(self.fileName_)
         if self.autoDetect:
             try:
                 self.img = findBorder(self.img)
@@ -124,7 +119,6 @@ class imageProcesser(QtGui.QWidget,QtGui.QWheelEvent):
                 self.lastPoint = event.pos()
                 x = self.lastPoint.x()
                 y = self.lastPoint.y()
-                self.drawnPixels.add((x,y))
                 self.scribbling = True
         elif self.toolsToggle[self.index['rec']] == True:
             if event.button() == QtCore.Qt.LeftButton:
@@ -158,9 +152,6 @@ class imageProcesser(QtGui.QWidget,QtGui.QWheelEvent):
     def mouseMoveEvent(self, event):
         if (event.buttons() & QtCore.Qt.LeftButton) and self.scribbling:
             point = event.pos()
-            #x = point.x()
-            #y = point.y()
-            #self.drawnPixels.add((x,y))
             if self.toolsToggle[self.index['brush']] == True:
                 self.drawLineTo(point)
         elif (event.buttons() & QtCore.Qt.LeftButton) and self.toolsToggle[self.index['rec']] == True and self.canDrawRec == True:
@@ -175,9 +166,6 @@ class imageProcesser(QtGui.QWidget,QtGui.QWheelEvent):
     def mouseReleaseEvent(self, event):
         if event.button() == QtCore.Qt.LeftButton and self.scribbling:
             point = event.pos()
-            #x = point.x()
-            #y = point.y()
-            #self.drawnPixels.add((x,y))
             self.drawLineTo(point)
             self.scribbling = False
         elif event.button() == QtCore.Qt.LeftButton and self.toolsToggle[self.index['rec']] == True:
@@ -249,7 +237,6 @@ class imageProcesser(QtGui.QWidget,QtGui.QWheelEvent):
                 y1 = self.lastPoint.y()
                 x2 = endPoint.x()
                 y2 = endPoint.y()
-                self.drawnPixels.add((x2,y2))
                 self.lastPoint = QtCore.QPoint(endPoint)
                 draw = ImageDraw.Draw(self.img)
                 draw.line(((x1,y1),(x2,y2)),self.color,2)
@@ -539,15 +526,17 @@ class gui(QtGui.QMainWindow, Ui_MainWindow,QtGui.QDialog):
         self.lastSecondaryValue = 255
 
     def openFile(self):
-        #fileName = QtGui.QFileDialog.getOpenFileName(self, "Abrir Imagem")
-        fileName = 'batata'
-        #if fileName:
-        self.scribbler.openImage(fileName)
-            #self.scribbler.setGeometry(50,0,self.scribbler.image.width(),self.scribbler.image.height())
+        fileName = QtGui.QFileDialog.getOpenFileName(self, "Abrir Imagem")
+        if fileName:
+            self.scribbler.openImage(fileName)
+        #self.scribbler.setGeometry(50,0,self.scribbler.image.width(),self.scribbler.image.height())
 
     def save(self):
         if self.scribbler.canSave == True:
-            fileNameSave = QtGui.QFileDialog.getSaveFileName(self, "Salvar Imagem","/home/untitled.png",("Images (*.png)"))
+            if sys.platform.startswith('linux'):
+                fileNameSave = QtGui.QFileDialog.getSaveFileName(self, "Salvar Imagem","/home/untitled.png",("Images (*.png)"))
+            else:
+                fileNameSave = QtGui.QFileDialog.getSaveFileName(self, "Salvar Imagem","C:/untitled.png",("Images (*.png)"))
             self.scribbler.toBeSaved.save(fileNameSave)
             self.scribbler.fileName_ = fileNameSave
             self.outputManipulation()
@@ -567,15 +556,15 @@ class gui(QtGui.QMainWindow, Ui_MainWindow,QtGui.QDialog):
         x2 = self.scribbler.recp2.x()
         y2 = self.scribbler.recp2.y()
         f.write(self.scribbler.fileName_ + '\n')
-        f.write(str(self.scribbler.image.width()) + ' ' +  str(self.scribbler.image.height()) + '\n')
-        f.write('(' + str(x1) +','+str(y1) + ')' + '  ' + '(' + str(x2) +','+str(y2) + ')' + '\n')
-        img = self.scribbler.img
+        f.write(str(x1)+' '+str(y1)+' '+str(x2)+' '+str(y2)+'\n')
+        pim = self.scribbler.img.load()
         for j in range (y1,y2):
             for i in range (x1,x2):
-                r,g,b = img.getpixel((i,j))
-                if (r,g,b) == (255,255,255):
+                if pim[i,j][0] >= (200) and pim[i,j][1] <= 50 and pim[i,j][2] <= 50: # check for red pixels
+                    f.write('2')
+                elif pim[i,j] == (255,255,255): # check for white pixels
                     f.write('1')
-                else:
+                else: # it has to be black then
                     f.write('0')
             f.write('\n')
 
