@@ -1,12 +1,18 @@
 from __future__ import division
 from PyQt4 import *
 from imageEditor import *
-from dialog import *
 from imgFunctions import *
 from copy import *
 
 # TODO
 # Adicionar dialogos para: modificação de arquivos; avisar que a imagem não foi binarizada
+
+htmlPrefix = "<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.0//EN\" \"http://www.w3.org/TR/REC-html40/strict.dtd\">\n"
+"<html><head><meta name=\"qrichtext\" content=\"1\" /><style type=\"text/css\">\n"
+"p, li { white-space: pre-wrap; }\n"
+"</style></head><body style=\" font-family:\'Ubuntu\'; font-size:11pt; font-weight:400; font-style:normal;\">\n"
+"<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\">"
+htmlSuffix = "</p></body></html>"
 
 class imageProcesser(QtGui.QWidget,QtGui.QWheelEvent):
     def __init__(self,parent = None):
@@ -70,7 +76,13 @@ class imageProcesser(QtGui.QWidget,QtGui.QWheelEvent):
         #self.image.load(name)
         self.img = Image.open(name)
         if self.autoDetect:
-            self.img = findBorder(self.img)
+            try:
+                self.img = findBorder(self.img)
+            except IndexError:
+                diag = dialogBox()
+                diag.text.setHtml(htmlPrefix + 'Não foi possível realizar a detecção automática do crânio, desligue a detecção automática e faça a demarcação manualmente.' + htmlSuffix)
+                diag.exec_()
+
         self.swapBuffers(self.img)
         self.modified = False
         self.lastSize = self.originalSize = self.img.size
@@ -196,24 +208,29 @@ class imageProcesser(QtGui.QWidget,QtGui.QWheelEvent):
         self.imgList.append((self.img.copy(),0)) #add the instance for the undo function
         pStack = [pixel]
         processedPixels = set()
+        pim = self.img.load()
         while len(pStack) > 0:
             x,y = pStack.pop()
             if (x,y) not in processedPixels:
-                r,g,b = self.img.getpixel((x,y))
                 processedPixels.add((x,y))
-                if r > 200 and g < 30 and b < 30: # check if the pixel is red
-                    self.img.putpixel((x,y),self.color)
-                else:
-                    self.img.putpixel((x,y),self.color)
-                    pStack.append((x + 1, y))
-                    pStack.append((x - 1, y))
-                    pStack.append((x, y + 1))
-                    pStack.append((x, y - 1))
+                try:
+                    if pim[x,y][0] > 200 and pim[x,y][1] < 30 and pim[x,y][2]  < 30: # check if the pixel is red
+                        pim[x,y] = self.color
+                    else:
+                        pim[x,y] = self.color
+                        pStack.append((x + 1, y))
+                        pStack.append((x - 1, y))
+                        pStack.append((x, y + 1))
+                        pStack.append((x, y - 1))
+                except IndexError:
+                    diag = dialogBox()
+                    diag.text.setHtml(htmlPrefix + 'Não foram encontradas bordas vermelhas\n, ou as bordas não foram devidamente conectadas' + htmlSuffix)
+                    diag.exec_()
+                    return
+
         self.modified = True
         self.swapBuffers(self.img)
         self.update()
-
-            
 
     #def resizeEvent(self, event):
         #if self.width() > self.image.width() or self.height() > self.image.height():
@@ -317,6 +334,12 @@ class imageProcesser(QtGui.QWidget,QtGui.QWheelEvent):
             self.update()
 
     def binarize(self):
+        if self.canDrawRec:
+            diag = dialogBox()
+            diag.text.setHtml(htmlPrefix + 'A área de evolução ainda não foi definida!' + htmlSuffix)
+            diag.exec_()
+            return
+
         self.imgList.append((self.img.copy(),0)) #add the instance for the undo function
         self.toBeSaved = self.img.copy()
         self.toBeSaved = self.toBeSaved.resize(self.originalSize,Image.BICUBIC)
@@ -528,6 +551,10 @@ class gui(QtGui.QMainWindow, Ui_MainWindow,QtGui.QDialog):
             self.scribbler.toBeSaved.save(fileNameSave)
             self.scribbler.fileName_ = fileNameSave
             self.outputManipulation()
+        else:
+            diag = dialogBox()
+            diag.text.setHtml(htmlPrefix + 'A demarcação ainda não foi finalizada!' + htmlSuffix)
+            diag.exec_()
 
     def outputManipulation(self):
         splits = self.scribbler.fileName_.split('/')
@@ -636,18 +663,15 @@ class gui(QtGui.QMainWindow, Ui_MainWindow,QtGui.QDialog):
         try:
             value = int(self.PrimaryValue.text())
         except ValueError:
-            print("Está querendo trollar safadinho?")
-            diag = dialogBox(self.centralwidget)
-            diag.text.setHtml("<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.0//EN\" \"http://www.w3.org/TR/REC-html40/strict.dtd\">\n"
-"<html><head><meta name=\"qrichtext\" content=\"1\" /><style type=\"text/css\">\n"
-"p, li { white-space: pre-wrap; }\n"
-"</style></head><body style=\" font-family:\'Ubuntu\'; font-size:11pt; font-weight:400; font-style:normal;\">\n"
-"<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\">Hello World!</p></body></html>")
-            diag.show()
+            diag = dialogBox()
+            diag.text.setHtml(htmlPrefix + 'Valor Inválido' + htmlSuffix)
+            diag.exec_()
             self.PrimaryValue.setText(str(self.lastPrimaryValue))
             return
         if value > 255:
-            print("Apenas entre 0 e 255 malandrão")
+            diag = dialogBox()
+            diag.text.setHtml(htmlPrefix + 'O valor dos limites precisa estar\nentre 0 e 255' + htmlSuffix)
+            diag.exec_()
             self.PrimaryValue.setText(str(self.lastPrimaryValue))
             return
         self.scribbler.thresh = value 
@@ -658,11 +682,15 @@ class gui(QtGui.QMainWindow, Ui_MainWindow,QtGui.QDialog):
         try:
             value = int(self.SecondaryValue.text())
         except ValueError:
-            print("Está querendo trollar safadinho?")
+            diag = dialogBox()
+            diag.text.setHtml(htmlPrefix + 'Valor Inválido' + htmlSuffix)
+            diag.exec_()
             self.SecondaryValue.setText(str(self.lastSecondaryValue))
             return
         if value > 255:
-            print("Apenas entre 0 e 255 malandrão")
+            diag = dialogBox()
+            diag.text.setHtml(htmlPrefix + 'O valor dos limites precisa estar\nentre 0 e 255' + htmlSuffix)
+            diag.exec_()
             self.SecondaryValue.setText(str(self.lastSecondaryValue))
             return
         self.scribbler.secondThresh = value
@@ -673,14 +701,15 @@ class gui(QtGui.QMainWindow, Ui_MainWindow,QtGui.QDialog):
         self.scribbler.secondToggle = not self.scribbler.secondToggle
 
 
-class dialogBox(QtGui.QWidget):
-    def __init__(self,parent = None):
-        super(dialogBox, self).__init__(parent)
+class dialogBox(QtGui.QDialog):
+    def __init__(self):
+        QtGui.QDialog.__init__(self)
         self.setAttribute(QtCore.Qt.WA_StaticContents)
-        self.setGeometry(500,500,500,500)
+        self.setGeometry(500,500,450,250)
         self.text = QtGui.QTextEdit(self)
         self.text.setGeometry(QtCore.QRect(10, 10, 431, 171))
         self.text.setReadOnly(True)
         self.ok = QtGui.QPushButton(self)
         self.ok.setGeometry(QtCore.QRect(170, 190, 98, 27))
+        self.ok.setText("OK")
         QtCore.QObject.connect(self.ok, QtCore.SIGNAL(("clicked()")), self.close)
