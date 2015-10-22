@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'imageEditor.ui'
 #
-# Created: Thu Oct 22 20:20:04 2015
+# Created: Thu Oct 22 20:35:48 2015
 #      by: PyQt4 UI code generator 4.10.4
 #
 # WARNING! All changes made in this file will be lost!
@@ -157,7 +157,7 @@ class Ui_MainWindow(object):
         self.SecondaryActivate = QtGui.QCheckBox(self.centralwidget)
         self.SecondaryActivate.setGeometry(QtCore.QRect(700, 10, 21, 22))
         self.SecondaryActivate.setText(_fromUtf8(""))
-        self.SecondaryActivate.setChecked(True)
+        self.SecondaryActivate.setChecked(False)
         self.SecondaryActivate.setTristate(False)
         self.SecondaryActivate.setObjectName(_fromUtf8("SecondaryActivate"))
         self.label_3 = QtGui.QLabel(self.centralwidget)
