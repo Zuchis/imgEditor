@@ -95,6 +95,7 @@ class imageProcesser(QtGui.QWidget,QtGui.QWheelEvent):
             return False
 
     def clearImage(self):
+        self.imgList.append((self.img.copy(),0)) #add the instance for the undo function
         self.image.fill(QtGui.qRgb(255, 255, 255))
         self.modified = True
         self.canDrawRec = True
@@ -499,14 +500,14 @@ class gui(QtGui.QMainWindow, Ui_MainWindow,QtGui.QDialog):
 
 #===================================================================
 
-        QtCore.QObject.connect(self.actionAbrir, QtCore.SIGNAL(("activated()")), self.openFile)
-        QtCore.QObject.connect(self.actionDeletar, QtCore.SIGNAL(("activated()")), self.scribbler.clearImage)
-        QtCore.QObject.connect(self.actionSalvar, QtCore.SIGNAL(("activated()")), self.save)
-        QtCore.QObject.connect(self.actionFinalizar_Demarca_o, QtCore.SIGNAL(("activated()")), self.scribbler.binarize)
-        QtCore.QObject.connect(self.actionDesfazer, QtCore.SIGNAL(("activated()")), self.scribbler.undo)
-        QtCore.QObject.connect(self.actionAmpliar, QtCore.SIGNAL(("activated()")), self.scribbler.zoom)
-        QtCore.QObject.connect(self.actionReduzir_uma_vez, QtCore.SIGNAL(("activated()")), self.scribbler.zoomOut)
-        QtCore.QObject.connect(self.actionTamanho_Original, QtCore.SIGNAL(("activated()")), self.scribbler.setOriginalSize)
+        #QtCore.QObject.connect(self.actionAbrir, QtCore.SIGNAL(("activated()")), self.openFile)
+        #QtCore.QObject.connect(self.actionDeletar, QtCore.SIGNAL(("activated()")), self.scribbler.clearImage)
+        #QtCore.QObject.connect(self.actionSalvar, QtCore.SIGNAL(("activated()")), self.save)
+        #QtCore.QObject.connect(self.actionFinalizar_Demarca_o, QtCore.SIGNAL(("activated()")), self.scribbler.binarize)
+        #QtCore.QObject.connect(self.actionDesfazer, QtCore.SIGNAL(("activated()")), self.scribbler.undo)
+        #QtCore.QObject.connect(self.actionAmpliar, QtCore.SIGNAL(("activated()")), self.scribbler.zoom)
+        #QtCore.QObject.connect(self.actionReduzir_uma_vez, QtCore.SIGNAL(("activated()")), self.scribbler.zoomOut)
+        #QtCore.QObject.connect(self.actionTamanho_Original, QtCore.SIGNAL(("activated()")), self.scribbler.setOriginalSize)
         QtCore.QObject.connect(self.PrimaryBar, QtCore.SIGNAL(("valueChanged(int)")), self.setPrimaryValue)
         QtCore.QObject.connect(self.SecondaryBar, QtCore.SIGNAL(("valueChanged(int)")), self.setSecondaryValue)
         QtCore.QObject.connect(self.PrimaryValue, QtCore.SIGNAL(("returnPressed()")), self.setPrimaryBar)
@@ -522,6 +523,15 @@ class gui(QtGui.QMainWindow, Ui_MainWindow,QtGui.QDialog):
         self.BlackRec.clicked.connect(self.scribbler.changeBlack)
         self.WhiteRec.clicked.connect(self.scribbler.changeWhite)
         self.RedRec.clicked.connect(self.scribbler.changeRed)
+        self.abrir.clicked.connect(self.openFile)
+        self.salvar.clicked.connect(self.save)
+        self.sair.clicked.connect(self.close)
+        self.deletar.clicked.connect(self.scribbler.clearImage)
+        self.binarizar.clicked.connect(self.scribbler.binarize)
+        self.undo_.clicked.connect(self.scribbler.undo)
+        self.ampliar.clicked.connect(self.scribbler.zoom)
+        self.reduzir.clicked.connect(self.scribbler.zoomOut)
+        self.original.clicked.connect(self.scribbler.setOriginalSize)
         self.lastPrimaryValue = 150
         self.lastSecondaryValue = 255
 

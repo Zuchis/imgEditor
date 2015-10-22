@@ -222,6 +222,167 @@
       </size>
      </property>
     </widget>
+    <widget class="QPushButton" name="abrir">
+     <property name="geometry">
+      <rect>
+       <x>0</x>
+       <y>590</y>
+       <width>41</width>
+       <height>27</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>Abrir</string>
+     </property>
+     <property name="shortcut">
+      <string>Ctrl+O</string>
+     </property>
+    </widget>
+    <widget class="QPushButton" name="sair">
+     <property name="geometry">
+      <rect>
+       <x>0</x>
+       <y>670</y>
+       <width>41</width>
+       <height>27</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>Sair</string>
+     </property>
+     <property name="shortcut">
+      <string>Ctrl+D</string>
+     </property>
+    </widget>
+    <widget class="QPushButton" name="salvar">
+     <property name="geometry">
+      <rect>
+       <x>0</x>
+       <y>630</y>
+       <width>41</width>
+       <height>27</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>Salvar</string>
+     </property>
+     <property name="shortcut">
+      <string>Ctrl+S</string>
+     </property>
+    </widget>
+    <widget class="QPushButton" name="deletar">
+     <property name="geometry">
+      <rect>
+       <x>0</x>
+       <y>710</y>
+       <width>41</width>
+       <height>27</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>Del</string>
+     </property>
+     <property name="shortcut">
+      <string>Ctrl+L</string>
+     </property>
+    </widget>
+    <widget class="QPushButton" name="binarizar">
+     <property name="geometry">
+      <rect>
+       <x>0</x>
+       <y>750</y>
+       <width>41</width>
+       <height>27</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>Bin</string>
+     </property>
+     <property name="shortcut">
+      <string>Ctrl+B</string>
+     </property>
+    </widget>
+    <widget class="QPushButton" name="undo_">
+     <property name="geometry">
+      <rect>
+       <x>0</x>
+       <y>790</y>
+       <width>41</width>
+       <height>27</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>Undo</string>
+     </property>
+     <property name="shortcut">
+      <string>Ctrl+Z</string>
+     </property>
+    </widget>
+    <widget class="QPushButton" name="ampliar">
+     <property name="geometry">
+      <rect>
+       <x>0</x>
+       <y>830</y>
+       <width>41</width>
+       <height>27</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>Amp</string>
+     </property>
+     <property name="shortcut">
+      <string>Ctrl+=</string>
+     </property>
+    </widget>
+    <widget class="QPushButton" name="reduzir">
+     <property name="geometry">
+      <rect>
+       <x>0</x>
+       <y>870</y>
+       <width>41</width>
+       <height>27</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>Red</string>
+     </property>
+     <property name="shortcut">
+      <string>Ctrl+-</string>
+     </property>
+    </widget>
+    <widget class="QPushButton" name="original">
+     <property name="geometry">
+      <rect>
+       <x>0</x>
+       <y>910</y>
+       <width>41</width>
+       <height>27</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>Orig</string>
+     </property>
+     <property name="shortcut">
+      <string>Ctrl+R</string>
+     </property>
+    </widget>
+    <zorder>Brush</zorder>
+    <zorder>Rectangle</zorder>
+    <zorder>BlackRec</zorder>
+    <zorder>LineLinker</zorder>
+    <zorder>Bucket</zorder>
+    <zorder>Eraser</zorder>
+    <zorder>WhiteRec</zorder>
+    <zorder>RedRec</zorder>
+    <zorder>abrir</zorder>
+    <zorder>sair</zorder>
+    <zorder>salvar</zorder>
+    <zorder>binarizar</zorder>
+    <zorder>undo_</zorder>
+    <zorder>ampliar</zorder>
+    <zorder>reduzir</zorder>
+    <zorder>original</zorder>
+    <zorder>deletar</zorder>
    </widget>
    <widget class="QSlider" name="PrimaryBar">
     <property name="geometry">
@@ -384,10 +545,7 @@
     <property name="title">
      <string>Arquivo</string>
     </property>
-    <addaction name="actionAbrir"/>
-    <addaction name="actionSalvar"/>
     <addaction name="separator"/>
-    <addaction name="actionSair"/>
    </widget>
    <widget class="QMenu" name="menuSobre">
     <property name="title">
@@ -402,115 +560,14 @@
      <property name="title">
       <string>Reduzir...</string>
      </property>
-     <addaction name="actionReduzir_uma_vez"/>
-     <addaction name="actionTamanho_Original"/>
     </widget>
-    <addaction name="actionDeletar"/>
-    <addaction name="actionFinalizar_Demarca_o"/>
-    <addaction name="actionDesfazer"/>
-    <addaction name="actionAmpliar"/>
     <addaction name="menuReduzir"/>
    </widget>
    <addaction name="menuArquivo"/>
    <addaction name="menuEditar"/>
    <addaction name="menuSobre"/>
   </widget>
-  <action name="actionAbrir">
-   <property name="text">
-    <string>Abrir...</string>
-   </property>
-   <property name="toolTip">
-    <string>Abrir Imagem</string>
-   </property>
-   <property name="shortcut">
-    <string>Ctrl+O</string>
-   </property>
-  </action>
-  <action name="actionSalvar">
-   <property name="text">
-    <string>Salvar...</string>
-   </property>
-   <property name="shortcut">
-    <string>Ctrl+S</string>
-   </property>
-  </action>
-  <action name="actionDeletar">
-   <property name="text">
-    <string>Deletar</string>
-   </property>
-   <property name="toolTip">
-    <string>Deletar Imagem</string>
-   </property>
-   <property name="shortcut">
-    <string>Ctrl+L</string>
-   </property>
-  </action>
-  <action name="actionSair">
-   <property name="text">
-    <string>Sair</string>
-   </property>
-   <property name="shortcut">
-    <string>Ctrl+D</string>
-   </property>
-  </action>
-  <action name="actionFinalizar_Demarca_o">
-   <property name="text">
-    <string>Finalizar Demarcação</string>
-   </property>
-   <property name="shortcut">
-    <string>Ctrl+B</string>
-   </property>
-  </action>
-  <action name="actionDesfazer">
-   <property name="text">
-    <string>Desfazer</string>
-   </property>
-   <property name="shortcut">
-    <string>Ctrl+Z</string>
-   </property>
-  </action>
-  <action name="actionAmpliar">
-   <property name="text">
-    <string>Ampliar</string>
-   </property>
-   <property name="shortcut">
-    <string>Ctrl+=</string>
-   </property>
-  </action>
-  <action name="actionReduzir_uma_vez">
-   <property name="text">
-    <string>Reduzir uma vez</string>
-   </property>
-   <property name="shortcut">
-    <string>Ctrl+-</string>
-   </property>
-  </action>
-  <action name="actionTamanho_Original">
-   <property name="text">
-    <string>Tamanho Original</string>
-   </property>
-   <property name="shortcut">
-    <string>Ctrl+R</string>
-   </property>
-  </action>
  </widget>
  <resources/>
- <connections>
-  <connection>
-   <sender>actionSair</sender>
-   <signal>activated()</signal>
-   <receiver>MainWindow</receiver>
-   <slot>close()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>-1</x>
-     <y>-1</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>499</x>
-     <y>499</y>
-    </hint>
-   </hints>
-  </connection>
- </connections>
+ <connections/>
 </ui>
